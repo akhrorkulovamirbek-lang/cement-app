@@ -151,6 +151,7 @@
       <div><div class="flabel">Цена продажи</div><input type="number" id="s_sell" placeholder="570000" oninput="calcProfit()"></div>
     </div>
     <div><div class="flabel">Йул кира / Бонус</div><input type="number" id="s_transport" placeholder="0" value="0" oninput="calcProfit()"></div>
+    <div><div class="flabel">Дата</div><input type="date" id="s_date"></div>
     <div class="profit-box" id="profitBox">
       <div class="profit-label">Фойда (прибыль)</div>
       <div class="profit-val" id="profitVal">0 сум</div>
@@ -172,6 +173,7 @@
       <select id="k_payment"><option value="">— выберите —</option><option value="накд">Наличные (накд)</option><option value="перечисление">Банк (перечисление)</option></select>
     </div>
     <div><div class="flabel">Сумма (сум)</div><input type="number" id="k_amount" placeholder="24600000"></div>
+    <div><div class="flabel">Дата</div><input type="date" id="k_date"></div>
     <button class="btn" onclick="submitKirim()">✓ Сохранить приход</button>
   </div>
 </div>
@@ -192,6 +194,7 @@
       <select id="ch_payment"><option value="">— выберите —</option><option value="накд">Наличные (накд)</option><option value="перечисление">Банк (перечисление)</option></select>
     </div>
     <div><div class="flabel">Сумма (сум)</div><input type="number" id="ch_amount" placeholder="25000000"></div>
+    <div><div class="flabel">Дата</div><input type="date" id="ch_date"></div>
     <button class="btn" onclick="submitChiqim()">✓ Сохранить расход</button>
   </div>
 </div>
@@ -225,12 +228,29 @@ const API = 'https://script.google.com/macros/s/AKfycbyecpjKA5w7vA9G8exvZ9BIXtxl
 let config = { clients:[], suppliers:[], cement:[], payment:[] };
 let modalType = '';
 
+function today() {
+  const d = new Date();
+  return d.toISOString().split('T')[0];
+}
+
+function setDates() {
+  ['s_date','k_date','ch_date'].forEach(id => {
+    document.getElementById(id).value = today();
+  });
+}
+
+function getDate(id) {
+  const v = document.getElementById(id).value;
+  return v ? new Date(v) : new Date();
+}
+
 async function init() {
   try {
     const r = await fetch(API + '?type=config');
     config = await r.json();
     fillAll();
     loadBalance();
+    setDates();
   } catch(e) { showToast('Нет соединения','err'); }
   document.getElementById('loader').classList.add('hidden');
 }
@@ -350,9 +370,9 @@ async function submitSavdo(){
   if(!val('s_client')||!val('s_supplier')||!val('s_cement')||!val('s_auto')||!val('s_tons')||!val('s_buy')||!val('s_sell')){showToast('Заполните все поля','err');return;}
   const btn=document.querySelector('#savdoScreen .btn');btn.disabled=true;btn.textContent='Сохраняем...';
   try{
-    const p=new URLSearchParams({type:'savdo',client:val('s_client'),supplier:val('s_supplier'),cement:val('s_cement'),auto:val('s_auto'),tons:val('s_tons'),buy_price:val('s_buy'),sell_price:val('s_sell'),transport:val('s_transport')||0});
+    const p=new URLSearchParams({type:'savdo',client:val('s_client'),supplier:val('s_supplier'),cement:val('s_cement'),auto:val('s_auto'),tons:val('s_tons'),buy_price:val('s_buy'),sell_price:val('s_sell'),transport:val('s_transport')||0,date:val('s_date')});
     const r=await fetch(API+'?'+p); const d=await r.json();
-    if(d.ok){showToast('✓ Фойда: '+Math.round(d.profit).toLocaleString('ru-RU')+' сум','ok');document.querySelectorAll('#savdoScreen input,#savdoScreen select').forEach(el=>{if(el.tagName==='SELECT')el.selectedIndex=0;else el.value='';});document.getElementById('profitBox').classList.remove('on');loadBalance();setTimeout(goHome,1500);}
+    if(d.ok){showToast('✓ Фойда: '+Math.round(d.profit).toLocaleString('ru-RU')+' сум','ok');document.querySelectorAll('#savdoScreen input,#savdoScreen select').forEach(el=>{if(el.tagName==='SELECT')el.selectedIndex=0;else el.value='';});document.getElementById('s_date').value=today();document.getElementById('profitBox').classList.remove('on');loadBalance();setTimeout(goHome,1500);}
     else showToast('Ошибка','err');
   }catch(e){showToast('Нет соединения','err');}
   btn.disabled=false;btn.textContent='✓ Сохранить продажу';
@@ -362,9 +382,9 @@ async function submitKirim(){
   if(!val('k_client')||!val('k_payment')||!val('k_amount')){showToast('Заполните все поля','err');return;}
   const btn=document.querySelector('#kirimScreen .btn');btn.disabled=true;btn.textContent='Сохраняем...';
   try{
-    const p=new URLSearchParams({type:'kirim',client:val('k_client'),payment_type:val('k_payment'),amount:val('k_amount')});
+    const p=new URLSearchParams({type:'kirim',client:val('k_client'),payment_type:val('k_payment'),amount:val('k_amount'),date:val('k_date')});
     const r=await fetch(API+'?'+p); const d=await r.json();
-    if(d.ok){showToast('✓ Приход сохранён!','ok');document.querySelectorAll('#kirimScreen input,#kirimScreen select').forEach(el=>{if(el.tagName==='SELECT')el.selectedIndex=0;else el.value='';});loadBalance();setTimeout(goHome,1500);}
+    if(d.ok){showToast('✓ Приход сохранён!','ok');document.querySelectorAll('#kirimScreen input,#kirimScreen select').forEach(el=>{if(el.tagName==='SELECT')el.selectedIndex=0;else el.value='';});document.getElementById('k_date').value=today();loadBalance();setTimeout(goHome,1500);}
     else showToast('Ошибка','err');
   }catch(e){showToast('Нет соединения','err');}
   btn.disabled=false;btn.textContent='✓ Сохранить приход';
@@ -374,9 +394,9 @@ async function submitChiqim(){
   if(!val('ch_payee')||!val('ch_type')||!val('ch_payment')||!val('ch_amount')){showToast('Заполните все поля','err');return;}
   const btn=document.querySelector('#chiqimScreen .btn');btn.disabled=true;btn.textContent='Сохраняем...';
   try{
-    const p=new URLSearchParams({type:'chiqim',payee:val('ch_payee'),expense_type:val('ch_type'),payment_type:val('ch_payment'),amount:val('ch_amount')});
+    const p=new URLSearchParams({type:'chiqim',payee:val('ch_payee'),expense_type:val('ch_type'),payment_type:val('ch_payment'),amount:val('ch_amount'),date:val('ch_date')});
     const r=await fetch(API+'?'+p); const d=await r.json();
-    if(d.ok){showToast('✓ Расход сохранён!','ok');document.querySelectorAll('#chiqimScreen input,#chiqimScreen select').forEach(el=>{if(el.tagName==='SELECT')el.selectedIndex=0;else el.value='';});loadBalance();setTimeout(goHome,1500);}
+    if(d.ok){showToast('✓ Расход сохранён!','ok');document.querySelectorAll('#chiqimScreen input,#chiqimScreen select').forEach(el=>{if(el.tagName==='SELECT')el.selectedIndex=0;else el.value='';});document.getElementById('ch_date').value=today();loadBalance();setTimeout(goHome,1500);}
     else showToast('Ошибка','err');
   }catch(e){showToast('Нет соединения','err');}
   btn.disabled=false;btn.textContent='✓ Сохранить расход';
