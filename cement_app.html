@@ -5,220 +5,69 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Цемент">
 <title>Учёт цемента</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
-
-  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-
-  :root {
-    --bg: #0f0f13;
-    --surface: #1a1a22;
-    --surface2: #22222e;
-    --border: #2e2e3e;
-    --text: #f0f0f5;
-    --muted: #7070a0;
-    --green: #22c55e;
-    --green-dim: #16a34a22;
-    --red: #ef4444;
-    --red-dim: #dc262622;
-    --blue: #60a5fa;
-    --blue-dim: #3b82f622;
-    --amber: #f59e0b;
-    --radius: 14px;
-    --font: 'Inter', sans-serif;
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  :root{
+    --bg:#0f0f13;--surface:#1a1a22;--surface2:#22222e;--border:#2e2e3e;
+    --text:#f0f0f5;--muted:#7070a0;--green:#22c55e;--green-dim:#16a34a22;
+    --red:#ef4444;--red-dim:#dc262622;--blue:#60a5fa;--blue-dim:#3b82f622;
+    --amber:#f59e0b;--radius:14px;--font:'Inter',sans-serif;
   }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--font);
-    min-height: 100dvh;
-    overflow-x: hidden;
-  }
-
-  /* Header */
-  .header {
-    padding: 52px 20px 16px;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .header-back {
-    width: 36px; height: 36px;
-    border-radius: 50%;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    display: none;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    font-size: 18px;
-    color: var(--muted);
-  }
-  .header-back.visible { display: flex; }
-  .header-title { font-size: 18px; font-weight: 600; }
-  .header-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
-
-  /* Main menu */
-  .menu { padding: 20px 16px; display: flex; flex-direction: column; gap: 10px; }
-
-  .menu-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 18px 20px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    cursor: pointer;
-    transition: background .15s, transform .1s;
-    active-opacity: 0.8;
-  }
-  .menu-card:active { transform: scale(0.98); background: var(--surface2); }
-
-  .menu-icon {
-    width: 48px; height: 48px;
-    border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 22px;
-    flex-shrink: 0;
-  }
-  .menu-icon.green { background: var(--green-dim); }
-  .menu-icon.blue  { background: var(--blue-dim); }
-  .menu-icon.red   { background: var(--red-dim); }
-  .menu-icon.amber { background: #f59e0b22; }
-
-  .menu-text { flex: 1; }
-  .menu-label { font-size: 16px; font-weight: 500; }
-  .menu-desc  { font-size: 13px; color: var(--muted); margin-top: 2px; }
-  .menu-arrow { color: var(--muted); font-size: 18px; }
-
-  /* Balance card */
-  .balance-card {
-    margin: 0 16px;
-    background: linear-gradient(135deg, #1e3a2f, #162a20);
-    border: 1px solid #2d5a3d;
-    border-radius: var(--radius);
-    padding: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .balance-label { font-size: 13px; color: #86efac; }
-  .balance-amount { font-size: 24px; font-weight: 600; color: var(--green); }
-  .balance-refresh {
-    width: 36px; height: 36px;
-    border-radius: 50%;
-    background: #16a34a33;
-    border: 1px solid #16a34a55;
-    display: flex; align-items: center; justify-content: center;
-    cursor: pointer;
-    font-size: 16px;
-    transition: transform .3s;
-  }
-  .balance-refresh.spinning { animation: spin .6s linear; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  /* Form */
-  .form { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-
-  .field-label {
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: .5px;
-    margin-bottom: 6px;
-  }
-
-  select, input[type=text], input[type=number] {
-    width: 100%;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    color: var(--text);
-    font-family: var(--font);
-    font-size: 16px;
-    padding: 14px 16px;
-    outline: none;
-    appearance: none;
-    -webkit-appearance: none;
-    transition: border-color .15s;
-  }
-  select:focus, input:focus { border-color: var(--blue); }
-  select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237070a0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 16px center; padding-right: 40px; }
-
-  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
-  /* Submit button */
-  .btn-submit {
-    background: var(--green);
-    color: #000;
-    font-family: var(--font);
-    font-size: 16px;
-    font-weight: 600;
-    border: none;
-    border-radius: var(--radius);
-    padding: 16px;
-    width: 100%;
-    cursor: pointer;
-    transition: opacity .15s, transform .1s;
-    margin-top: 4px;
-  }
-  .btn-submit:active { opacity: .85; transform: scale(0.98); }
-  .btn-submit:disabled { opacity: .4; cursor: not-allowed; }
-
+  body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100dvh;overflow-x:hidden}
+  .header{padding:52px 20px 16px;background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+  .back{width:36px;height:36px;border-radius:50%;background:var(--surface2);border:1px solid var(--border);display:none;align-items:center;justify-content:center;cursor:pointer;font-size:18px;color:var(--muted)}
+  .back.on{display:flex}
+  .header-title{font-size:18px;font-weight:600}
+  .header-sub{font-size:12px;color:var(--muted);margin-top:2px}
+  .screen{display:none}.screen.on{display:block}
+  .menu{padding:20px 16px;display:flex;flex-direction:column;gap:10px}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;display:flex;align-items:center;gap:16px;cursor:pointer;transition:background .15s,transform .1s}
+  .card:active{transform:scale(0.98);background:var(--surface2)}
+  .icon{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+  .icon.g{background:var(--green-dim)}.icon.b{background:var(--blue-dim)}.icon.r{background:var(--red-dim)}.icon.a{background:#f59e0b22}.icon.p{background:#a855f722}
+  .card-text{flex:1}.card-label{font-size:16px;font-weight:500}.card-desc{font-size:13px;color:var(--muted);margin-top:2px}
+  .arrow{color:var(--muted);font-size:18px}
+  .balance-card{margin:0 16px;background:linear-gradient(135deg,#1e3a2f,#162a20);border:1px solid #2d5a3d;border-radius:var(--radius);padding:20px;display:flex;align-items:center;justify-content:space-between}
+  .bal-label{font-size:13px;color:#86efac}.bal-amt{font-size:24px;font-weight:600;color:var(--green)}
+  .refresh{width:36px;height:36px;border-radius:50%;background:#16a34a33;border:1px solid #16a34a55;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;transition:transform .3s}
+  .refresh.spin{animation:spin .6s linear}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .form{padding:16px;display:flex;flex-direction:column;gap:12px}
+  .flabel{font-size:12px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+  .input-row{display:flex;gap:8px;align-items:flex-end}
+  select,input[type=text],input[type=number]{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--font);font-size:16px;padding:14px 16px;outline:none;appearance:none;-webkit-appearance:none;transition:border-color .15s}
+  select:focus,input:focus{border-color:var(--blue)}
+  select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237070a0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center;padding-right:40px}
+  .add-btn{width:44px;height:48px;flex-shrink:0;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--green);font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s}
+  .add-btn:active{background:var(--green-dim)}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .btn{background:var(--green);color:#000;font-family:var(--font);font-size:16px;font-weight:600;border:none;border-radius:var(--radius);padding:16px;width:100%;cursor:pointer;transition:opacity .15s,transform .1s;margin-top:4px}
+  .btn:active{opacity:.85;transform:scale(0.98)}.btn:disabled{opacity:.4;cursor:not-allowed}
+  .btn.blue{background:var(--blue)}.btn.red{background:var(--red)}
+  .profit-box{background:var(--green-dim);border:1px solid #16a34a44;border-radius:10px;padding:14px 16px;display:none}
+  .profit-box.on{display:block}
+  .profit-label{font-size:12px;color:#86efac;margin-bottom:4px}.profit-val{font-size:20px;font-weight:600;color:var(--green)}
   /* Toast */
-  .toast {
-    position: fixed;
-    bottom: 32px;
-    left: 50%;
-    transform: translateX(-50%) translateY(100px);
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 100px;
-    padding: 12px 24px;
-    font-size: 14px;
-    font-weight: 500;
-    transition: transform .3s cubic-bezier(.34,1.56,.64,1);
-    z-index: 999;
-    white-space: nowrap;
-  }
-  .toast.show { transform: translateX(-50%) translateY(0); }
-  .toast.success { border-color: var(--green); color: var(--green); }
-  .toast.error   { border-color: var(--red);   color: var(--red); }
-
-  /* Screen management */
-  .screen { display: none; }
-  .screen.active { display: block; }
-
+  .toast{position:fixed;bottom:32px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--surface2);border:1px solid var(--border);border-radius:100px;padding:12px 24px;font-size:14px;font-weight:500;transition:transform .3s cubic-bezier(.34,1.56,.64,1);z-index:999;white-space:nowrap}
+  .toast.on{transform:translateX(-50%) translateY(0)}.toast.ok{border-color:var(--green);color:var(--green)}.toast.err{border-color:var(--red);color:var(--red)}
+  /* Modal */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:none;align-items:flex-end}
+  .modal-overlay.on{display:flex}
+  .modal{background:var(--surface);border-radius:20px 20px 0 0;padding:24px 20px 40px;width:100%;display:flex;flex-direction:column;gap:12px}
+  .modal-title{font-size:17px;font-weight:600;margin-bottom:4px}
+  /* Report */
+  .report-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;display:flex;flex-direction:column;gap:10px}
+  .report-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)}
+  .report-row:last-child{border-bottom:none}
+  .report-key{font-size:14px;color:var(--muted)}.report-val{font-size:15px;font-weight:600}
+  .report-val.green{color:var(--green)}.report-val.red{color:var(--red)}.report-val.blue{color:var(--blue)}
   /* Loader */
-  .loader {
-    position: fixed; inset: 0;
-    background: var(--bg);
-    display: flex; align-items: center; justify-content: center;
-    z-index: 100;
-    transition: opacity .3s;
-  }
-  .loader.hidden { opacity: 0; pointer-events: none; }
-  .spinner { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--green); border-radius: 50%; animation: spin .8s linear infinite; }
-
-  /* Profit preview */
-  .profit-preview {
-    background: var(--green-dim);
-    border: 1px solid #16a34a44;
-    border-radius: 10px;
-    padding: 14px 16px;
-    display: none;
-  }
-  .profit-preview.visible { display: block; }
-  .profit-label { font-size: 12px; color: #86efac; margin-bottom: 4px; }
-  .profit-value { font-size: 20px; font-weight: 600; color: var(--green); }
+  .loader{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:100;transition:opacity .3s}
+  .loader.hidden{opacity:0;pointer-events:none}
+  .spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite}
 </style>
 </head>
 <body>
@@ -226,295 +75,311 @@
 <div class="loader" id="loader"><div class="spinner"></div></div>
 <div class="toast" id="toast"></div>
 
-<!-- HEADER -->
+<!-- ADD MODAL -->
+<div class="modal-overlay" id="addModal" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-title" id="modalTitle">Добавить</div>
+    <input type="text" id="modalInput" placeholder="Введите имя...">
+    <button class="btn" onclick="submitAdd()">Добавить</button>
+  </div>
+</div>
+
 <div class="header">
-  <div class="header-back" id="backBtn" onclick="goHome()">←</div>
+  <div class="back" id="backBtn" onclick="goHome()">←</div>
   <div>
-    <div class="header-title" id="headerTitle">Учёт цемента 🏗</div>
-    <div class="header-sub" id="headerSub">Выберите операцию</div>
+    <div class="header-title" id="hTitle">Учёт цемента 🏗</div>
+    <div class="header-sub" id="hSub">Выберите операцию</div>
   </div>
 </div>
 
-<!-- HOME SCREEN -->
-<div class="screen active" id="homeScreen">
+<!-- HOME -->
+<div class="screen on" id="homeScreen">
   <div style="height:16px"></div>
-
   <div class="balance-card">
-    <div>
-      <div class="balance-label">Остаток кассы</div>
-      <div class="balance-amount" id="balanceAmt">—</div>
-    </div>
-    <div class="balance-refresh" id="refreshBtn" onclick="loadBalance()">↻</div>
+    <div><div class="bal-label">Остаток кассы</div><div class="bal-amt" id="balAmt">—</div></div>
+    <div class="refresh" id="refreshBtn" onclick="loadBalance()">↻</div>
   </div>
-
   <div class="menu">
-    <div class="menu-card" onclick="showScreen('savdoScreen','📦 Продажа','Savdo')">
-      <div class="menu-icon green">📦</div>
-      <div class="menu-text">
-        <div class="menu-label">Продажа</div>
-        <div class="menu-desc">Записать реализацию цемента</div>
-      </div>
-      <div class="menu-arrow">›</div>
+    <div class="card" onclick="showScreen('savdoScreen','📦 Продажа','Savdo')">
+      <div class="icon g">📦</div>
+      <div class="card-text"><div class="card-label">Продажа</div><div class="card-desc">Записать реализацию цемента</div></div>
+      <div class="arrow">›</div>
     </div>
-    <div class="menu-card" onclick="showScreen('kirimScreen','💚 Приход','Kirim')">
-      <div class="menu-icon blue">💚</div>
-      <div class="menu-text">
-        <div class="menu-label">Приход денег</div>
-        <div class="menu-desc">Оплата от клиента</div>
-      </div>
-      <div class="menu-arrow">›</div>
+    <div class="card" onclick="showScreen('kirimScreen','💚 Приход','Kirim')">
+      <div class="icon b">💚</div>
+      <div class="card-text"><div class="card-label">Приход денег</div><div class="card-desc">Оплата от клиента</div></div>
+      <div class="arrow">›</div>
     </div>
-    <div class="menu-card" onclick="showScreen('chiqimScreen','🔴 Расход','Chiqim')">
-      <div class="menu-icon red">🔴</div>
-      <div class="menu-text">
-        <div class="menu-label">Расход денег</div>
-        <div class="menu-desc">Оплата поставщику / транспорт</div>
-      </div>
-      <div class="menu-arrow">›</div>
+    <div class="card" onclick="showScreen('chiqimScreen','🔴 Расход','Chiqim')">
+      <div class="icon r">🔴</div>
+      <div class="card-text"><div class="card-label">Расход денег</div><div class="card-desc">Оплата поставщику / транспорт</div></div>
+      <div class="arrow">›</div>
+    </div>
+    <div class="card" onclick="showScreen('reportScreen','📊 Отчёт по клиенту','Выберите клиента')">
+      <div class="icon a">📊</div>
+      <div class="card-text"><div class="card-label">Отчёт по клиенту</div><div class="card-desc">Продажи, оплаты, долг</div></div>
+      <div class="arrow">›</div>
+    </div>
+    <div class="card" onclick="showScreen('addScreen','➕ Добавить','Клиент или поставщик')">
+      <div class="icon p">➕</div>
+      <div class="card-text"><div class="card-label">Добавить клиента / поставщика</div><div class="card-desc">В таблицу Google Sheets</div></div>
+      <div class="arrow">›</div>
     </div>
   </div>
 </div>
 
-<!-- SAVDO SCREEN -->
+<!-- SAVDO -->
 <div class="screen" id="savdoScreen">
   <div class="form">
-    <div>
-      <div class="field-label">Клиент</div>
-      <select id="s_client"><option value="">— выберите —</option></select>
+    <div><div class="flabel">Клиент</div>
+      <div class="input-row">
+        <select id="s_client"><option value="">— выберите —</option></select>
+        <div class="add-btn" onclick="openModal('client')">+</div>
+      </div>
     </div>
-    <div>
-      <div class="field-label">Поставщик</div>
-      <select id="s_supplier"><option value="">— выберите —</option></select>
+    <div><div class="flabel">Поставщик</div>
+      <div class="input-row">
+        <select id="s_supplier"><option value="">— выберите —</option></select>
+        <div class="add-btn" onclick="openModal('supplier')">+</div>
+      </div>
     </div>
-    <div>
-      <div class="field-label">Марка цемента</div>
-      <select id="s_cement"><option value="">— выберите —</option></select>
-    </div>
-    <div>
-      <div class="field-label">Номер авто</div>
-      <input type="text" id="s_auto" placeholder="30 678 YBA">
-    </div>
-    <div>
-      <div class="field-label">Тоннаж</div>
-      <input type="number" id="s_tons" placeholder="48.5" step="0.01" oninput="calcProfit()">
-    </div>
+    <div><div class="flabel">Марка цемента</div><select id="s_cement"><option value="">— выберите —</option></select></div>
+    <div><div class="flabel">Номер авто</div><input type="text" id="s_auto" placeholder="30 678 YBA"></div>
+    <div><div class="flabel">Тоннаж</div><input type="number" id="s_tons" placeholder="48.5" step="0.01" oninput="calcProfit()"></div>
     <div class="row2">
-      <div>
-        <div class="field-label">Цена покупки</div>
-        <input type="number" id="s_buy" placeholder="550 000" oninput="calcProfit()">
-      </div>
-      <div>
-        <div class="field-label">Цена продажи</div>
-        <input type="number" id="s_sell" placeholder="570 000" oninput="calcProfit()">
-      </div>
+      <div><div class="flabel">Цена покупки</div><input type="number" id="s_buy" placeholder="550000" oninput="calcProfit()"></div>
+      <div><div class="flabel">Цена продажи</div><input type="number" id="s_sell" placeholder="570000" oninput="calcProfit()"></div>
     </div>
-    <div>
-      <div class="field-label">Йул кира / Бонус (0 если нет)</div>
-      <input type="number" id="s_transport" placeholder="0" value="0" oninput="calcProfit()">
-    </div>
-    <div class="profit-preview" id="profitPreview">
+    <div><div class="flabel">Йул кира / Бонус</div><input type="number" id="s_transport" placeholder="0" value="0" oninput="calcProfit()"></div>
+    <div class="profit-box" id="profitBox">
       <div class="profit-label">Фойда (прибыль)</div>
-      <div class="profit-value" id="profitVal">0 сум</div>
+      <div class="profit-val" id="profitVal">0 сум</div>
     </div>
-    <button class="btn-submit" onclick="submitSavdo()">✓ Сохранить продажу</button>
+    <button class="btn" onclick="submitSavdo()">✓ Сохранить продажу</button>
   </div>
 </div>
 
-<!-- KIRIM SCREEN -->
+<!-- KIRIM -->
 <div class="screen" id="kirimScreen">
   <div class="form">
-    <div>
-      <div class="field-label">Клиент</div>
-      <select id="k_client"><option value="">— выберите —</option></select>
+    <div><div class="flabel">Клиент</div>
+      <div class="input-row">
+        <select id="k_client"><option value="">— выберите —</option></select>
+        <div class="add-btn" onclick="openModal('client')">+</div>
+      </div>
     </div>
-    <div>
-      <div class="field-label">Тип оплаты</div>
-      <select id="k_payment">
-        <option value="">— выберите —</option>
-        <option value="накд">Наличные (накд)</option>
-        <option value="перечисление">Банк (перечисление)</option>
-      </select>
+    <div><div class="flabel">Тип оплаты</div>
+      <select id="k_payment"><option value="">— выберите —</option><option value="накд">Наличные (накд)</option><option value="перечисление">Банк (перечисление)</option></select>
     </div>
-    <div>
-      <div class="field-label">Сумма (сум)</div>
-      <input type="number" id="k_amount" placeholder="24 600 000">
-    </div>
-    <button class="btn-submit" onclick="submitKirim()">✓ Сохранить приход</button>
+    <div><div class="flabel">Сумма (сум)</div><input type="number" id="k_amount" placeholder="24600000"></div>
+    <button class="btn" onclick="submitKirim()">✓ Сохранить приход</button>
   </div>
 </div>
 
-<!-- CHIQIM SCREEN -->
+<!-- CHIQIM -->
 <div class="screen" id="chiqimScreen">
   <div class="form">
-    <div>
-      <div class="field-label">Поставщик / получатель</div>
-      <select id="ch_payee"><option value="">— выберите —</option></select>
+    <div><div class="flabel">Поставщик / получатель</div>
+      <div class="input-row">
+        <select id="ch_payee"><option value="">— выберите —</option></select>
+        <div class="add-btn" onclick="openModal('supplier')">+</div>
+      </div>
     </div>
-    <div>
-      <div class="field-label">Категория</div>
-      <select id="ch_type">
-        <option value="">— выберите —</option>
-        <option value="за товар">За товар</option>
-        <option value="возврат">Возврат клиенту</option>
-        <option value="йул кира">Йул кира (транспорт)</option>
-      </select>
+    <div><div class="flabel">Категория</div>
+      <select id="ch_type"><option value="">— выберите —</option><option value="за товар">За товар</option><option value="возврат">Возврат клиенту</option><option value="йул кира">Йул кира (транспорт)</option></select>
     </div>
-    <div>
-      <div class="field-label">Тип оплаты</div>
-      <select id="ch_payment">
-        <option value="">— выберите —</option>
-        <option value="накд">Наличные (накд)</option>
-        <option value="перечисление">Банк (перечисление)</option>
-      </select>
+    <div><div class="flabel">Тип оплаты</div>
+      <select id="ch_payment"><option value="">— выберите —</option><option value="накд">Наличные (накд)</option><option value="перечисление">Банк (перечисление)</option></select>
     </div>
-    <div>
-      <div class="field-label">Сумма (сум)</div>
-      <input type="number" id="ch_amount" placeholder="25 000 000">
+    <div><div class="flabel">Сумма (сум)</div><input type="number" id="ch_amount" placeholder="25000000"></div>
+    <button class="btn" onclick="submitChiqim()">✓ Сохранить расход</button>
+  </div>
+</div>
+
+<!-- REPORT -->
+<div class="screen" id="reportScreen">
+  <div class="form">
+    <div><div class="flabel">Выберите клиента</div><select id="r_client" onchange="loadReport()"><option value="">— выберите —</option></select></div>
+    <div id="reportResult"></div>
+  </div>
+</div>
+
+<!-- ADD SCREEN -->
+<div class="screen" id="addScreen">
+  <div class="form">
+    <div class="card" onclick="openModal('client')">
+      <div class="icon g">👤</div>
+      <div class="card-text"><div class="card-label">Новый клиент</div><div class="card-desc">Добавить в Mijozlar_saldo</div></div>
+      <div class="arrow">›</div>
     </div>
-    <button class="btn-submit" onclick="submitChiqim()">✓ Сохранить расход</button>
+    <div class="card" onclick="openModal('supplier')">
+      <div class="icon b">🏭</div>
+      <div class="card-text"><div class="card-label">Новый поставщик</div><div class="card-desc">Добавить в Yetkazib_beruvchi</div></div>
+      <div class="arrow">›</div>
+    </div>
   </div>
 </div>
 
 <script>
 const API = 'https://script.google.com/macros/s/AKfycbyecpjKA5w7vA9G8exvZ9BIXtxlUkFwtoW7x9bIso8vMwhBcfm7hZXi9DI8djE8y1KQMg/exec';
-
-let config = {};
+let config = { clients:[], suppliers:[], cement:[], payment:[] };
+let modalType = '';
 
 async function init() {
   try {
     const r = await fetch(API + '?type=config');
     config = await r.json();
-    fillSelect('s_client',   config.clients);
-    fillSelect('s_supplier', config.suppliers);
-    fillSelect('s_cement',   config.cement);
-    fillSelect('k_client',   config.clients);
-    fillSelect('ch_payee',   config.suppliers);
+    fillAll();
     loadBalance();
-  } catch(e) {
-    showToast('Нет соединения', 'error');
-  }
+  } catch(e) { showToast('Нет соединения','err'); }
   document.getElementById('loader').classList.add('hidden');
+}
+
+function fillAll() {
+  fillSelect('s_client', config.clients);
+  fillSelect('s_supplier', config.suppliers);
+  fillSelect('s_cement', config.cement);
+  fillSelect('k_client', config.clients);
+  fillSelect('ch_payee', config.suppliers);
+  fillSelect('r_client', config.clients);
 }
 
 function fillSelect(id, items) {
   const sel = document.getElementById(id);
-  items.forEach(item => {
-    const opt = document.createElement('option');
-    opt.value = opt.textContent = item;
-    sel.appendChild(opt);
-  });
+  const cur = sel.value;
+  while(sel.options.length > 1) sel.remove(1);
+  items.forEach(item => { const o=document.createElement('option'); o.value=o.textContent=item; sel.appendChild(o); });
+  if(cur) sel.value = cur;
 }
 
 async function loadBalance() {
   const btn = document.getElementById('refreshBtn');
-  btn.classList.add('spinning');
+  btn.classList.add('spin');
   try {
-    const r = await fetch(API + '?type=balance');
+    const r = await fetch(API+'?type=balance');
     const d = await r.json();
-    if (d.ok) document.getElementById('balanceAmt').textContent = Math.round(d.balance).toLocaleString('ru-RU') + ' сум';
-  } catch(e) {}
-  setTimeout(() => btn.classList.remove('spinning'), 600);
+    if(d.ok) document.getElementById('balAmt').textContent = Math.round(d.balance).toLocaleString('ru-RU')+' сум';
+  } catch(e){}
+  setTimeout(()=>btn.classList.remove('spin'),600);
 }
 
 function showScreen(id, title, sub) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-  document.getElementById('headerTitle').textContent = title;
-  document.getElementById('headerSub').textContent = sub;
-  document.getElementById('backBtn').classList.add('visible');
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  document.getElementById('hTitle').textContent = title;
+  document.getElementById('hSub').textContent = sub;
+  document.getElementById('backBtn').classList.add('on');
 }
 
 function goHome() {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('homeScreen').classList.add('active');
-  document.getElementById('headerTitle').textContent = 'Учёт цемента 🏗';
-  document.getElementById('headerSub').textContent = 'Выберите операцию';
-  document.getElementById('backBtn').classList.remove('visible');
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  document.getElementById('homeScreen').classList.add('on');
+  document.getElementById('hTitle').textContent = 'Учёт цемента 🏗';
+  document.getElementById('hSub').textContent = 'Выберите операцию';
+  document.getElementById('backBtn').classList.remove('on');
+}
+
+function openModal(type) {
+  modalType = type;
+  document.getElementById('modalTitle').textContent = type==='client' ? '👤 Новый клиент' : '🏭 Новый поставщик';
+  document.getElementById('modalInput').value = '';
+  document.getElementById('addModal').classList.add('on');
+  setTimeout(()=>document.getElementById('modalInput').focus(), 300);
+}
+
+function closeModal(e) {
+  if(e.target.id==='addModal') document.getElementById('addModal').classList.remove('on');
+}
+
+async function submitAdd() {
+  const name = document.getElementById('modalInput').value.trim();
+  if(!name) { showToast('Введите имя','err'); return; }
+  const type = modalType==='client' ? 'add_client' : 'add_supplier';
+  try {
+    const r = await fetch(API+'?type='+type+'&name='+encodeURIComponent(name));
+    const d = await r.json();
+    if(d.ok) {
+      if(modalType==='client') config.clients.push(name);
+      else config.suppliers.push(name);
+      fillAll();
+      document.getElementById('addModal').classList.remove('on');
+      showToast('✓ '+name+' добавлен!','ok');
+    } else showToast('Ошибка','err');
+  } catch(e) { showToast('Нет соединения','err'); }
+}
+
+async function loadReport() {
+  const name = document.getElementById('r_client').value;
+  if(!name) return;
+  document.getElementById('reportResult').innerHTML = '<div style="color:var(--muted);text-align:center;padding:20px">Загружаем...</div>';
+  try {
+    const r = await fetch(API+'?type=client_report&name='+encodeURIComponent(name));
+    const d = await r.json();
+    if(!d.ok) { document.getElementById('reportResult').innerHTML=''; return; }
+    const debtColor = d.debt > 0 ? 'red' : d.debt < 0 ? 'green' : '';
+    document.getElementById('reportResult').innerHTML = `
+      <div class="report-card">
+        <div class="report-row"><span class="report-key">Сделок</span><span class="report-val blue">${d.deals}</span></div>
+        <div class="report-row"><span class="report-key">Тонн куплено</span><span class="report-val">${d.totalTons.toLocaleString('ru-RU')} тн</span></div>
+        <div class="report-row"><span class="report-key">Продано на сумму</span><span class="report-val">${Math.round(d.totalSell).toLocaleString('ru-RU')} сум</span></div>
+        <div class="report-row"><span class="report-key">Оплачено</span><span class="report-val green">${Math.round(d.totalPaid).toLocaleString('ru-RU')} сум</span></div>
+        <div class="report-row"><span class="report-key">Текущий долг</span><span class="report-val ${debtColor}">${Math.round(d.debt).toLocaleString('ru-RU')} сум</span></div>
+      </div>`;
+  } catch(e) { showToast('Нет соединения','err'); }
 }
 
 function calcProfit() {
-  const tons = parseFloat(document.getElementById('s_tons').value) || 0;
-  const buy  = parseFloat(document.getElementById('s_buy').value) || 0;
-  const sell = parseFloat(document.getElementById('s_sell').value) || 0;
-  const tr   = parseFloat(document.getElementById('s_transport').value) || 0;
-  const profit = tons * sell - tons * buy - tr;
-  const preview = document.getElementById('profitPreview');
-  if (tons && buy && sell) {
-    preview.classList.add('visible');
-    document.getElementById('profitVal').textContent = Math.round(profit).toLocaleString('ru-RU') + ' сум';
-  } else {
-    preview.classList.remove('visible');
-  }
+  const t=parseFloat(document.getElementById('s_tons').value)||0;
+  const b=parseFloat(document.getElementById('s_buy').value)||0;
+  const s=parseFloat(document.getElementById('s_sell').value)||0;
+  const tr=parseFloat(document.getElementById('s_transport').value)||0;
+  const p=t*s-t*b-tr;
+  const box=document.getElementById('profitBox');
+  if(t&&b&&s){box.classList.add('on');document.getElementById('profitVal').textContent=Math.round(p).toLocaleString('ru-RU')+' сум';}
+  else box.classList.remove('on');
 }
 
-function showToast(msg, type='success') {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = 'toast ' + type + ' show';
-  setTimeout(() => t.classList.remove('show'), 3000);
+function showToast(msg,type='ok'){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.className='toast '+type+' on';
+  setTimeout(()=>t.classList.remove('on'),3000);
+}
+function val(id){return document.getElementById(id).value.trim();}
+
+async function submitSavdo(){
+  if(!val('s_client')||!val('s_supplier')||!val('s_cement')||!val('s_auto')||!val('s_tons')||!val('s_buy')||!val('s_sell')){showToast('Заполните все поля','err');return;}
+  const btn=document.querySelector('#savdoScreen .btn');btn.disabled=true;btn.textContent='Сохраняем...';
+  try{
+    const p=new URLSearchParams({type:'savdo',client:val('s_client'),supplier:val('s_supplier'),cement:val('s_cement'),auto:val('s_auto'),tons:val('s_tons'),buy_price:val('s_buy'),sell_price:val('s_sell'),transport:val('s_transport')||0});
+    const r=await fetch(API+'?'+p); const d=await r.json();
+    if(d.ok){showToast('✓ Фойда: '+Math.round(d.profit).toLocaleString('ru-RU')+' сум','ok');document.querySelectorAll('#savdoScreen input,#savdoScreen select').forEach(el=>{if(el.tagName==='SELECT')el.selectedIndex=0;else el.value='';});document.getElementById('profitBox').classList.remove('on');loadBalance();setTimeout(goHome,1500);}
+    else showToast('Ошибка','err');
+  }catch(e){showToast('Нет соединения','err');}
+  btn.disabled=false;btn.textContent='✓ Сохранить продажу';
 }
 
-function val(id) { return document.getElementById(id).value.trim(); }
-
-async function submitSavdo() {
-  if (!val('s_client')||!val('s_supplier')||!val('s_cement')||!val('s_auto')||!val('s_tons')||!val('s_buy')||!val('s_sell')) {
-    showToast('Заполните все поля', 'error'); return;
-  }
-  const btn = document.querySelector('#savdoScreen .btn-submit');
-  btn.disabled = true; btn.textContent = 'Сохраняем...';
-  try {
-    const params = new URLSearchParams({ type:'savdo', client:val('s_client'), supplier:val('s_supplier'), cement:val('s_cement'), auto:val('s_auto'), tons:val('s_tons'), buy_price:val('s_buy'), sell_price:val('s_sell'), transport:val('s_transport')||0 });
-    const r = await fetch(API + '?' + params);
-    const d = await r.json();
-    if (d.ok) {
-      showToast('✓ Продажа сохранена! Фойда: ' + Math.round(d.profit).toLocaleString('ru-RU') + ' сум');
-      document.querySelectorAll('#savdoScreen input, #savdoScreen select').forEach(el => { if(el.tagName==='SELECT') el.selectedIndex=0; else el.value=''; });
-      document.getElementById('profitPreview').classList.remove('visible');
-      loadBalance();
-      setTimeout(goHome, 1500);
-    } else { showToast('Ошибка: ' + d.error, 'error'); }
-  } catch(e) { showToast('Нет соединения', 'error'); }
-  btn.disabled = false; btn.textContent = '✓ Сохранить продажу';
+async function submitKirim(){
+  if(!val('k_client')||!val('k_payment')||!val('k_amount')){showToast('Заполните все поля','err');return;}
+  const btn=document.querySelector('#kirimScreen .btn');btn.disabled=true;btn.textContent='Сохраняем...';
+  try{
+    const p=new URLSearchParams({type:'kirim',client:val('k_client'),payment_type:val('k_payment'),amount:val('k_amount')});
+    const r=await fetch(API+'?'+p); const d=await r.json();
+    if(d.ok){showToast('✓ Приход сохранён!','ok');document.querySelectorAll('#kirimScreen input,#kirimScreen select').forEach(el=>{if(el.tagName==='SELECT')el.selectedIndex=0;else el.value='';});loadBalance();setTimeout(goHome,1500);}
+    else showToast('Ошибка','err');
+  }catch(e){showToast('Нет соединения','err');}
+  btn.disabled=false;btn.textContent='✓ Сохранить приход';
 }
 
-async function submitKirim() {
-  if (!val('k_client')||!val('k_payment')||!val('k_amount')) {
-    showToast('Заполните все поля', 'error'); return;
-  }
-  const btn = document.querySelector('#kirimScreen .btn-submit');
-  btn.disabled = true; btn.textContent = 'Сохраняем...';
-  try {
-    const params = new URLSearchParams({ type:'kirim', client:val('k_client'), payment_type:val('k_payment'), amount:val('k_amount') });
-    const r = await fetch(API + '?' + params);
-    const d = await r.json();
-    if (d.ok) {
-      showToast('✓ Приход сохранён!');
-      document.querySelectorAll('#kirimScreen input, #kirimScreen select').forEach(el => { if(el.tagName==='SELECT') el.selectedIndex=0; else el.value=''; });
-      loadBalance();
-      setTimeout(goHome, 1500);
-    } else { showToast('Ошибка', 'error'); }
-  } catch(e) { showToast('Нет соединения', 'error'); }
-  btn.disabled = false; btn.textContent = '✓ Сохранить приход';
-}
-
-async function submitChiqim() {
-  if (!val('ch_payee')||!val('ch_type')||!val('ch_payment')||!val('ch_amount')) {
-    showToast('Заполните все поля', 'error'); return;
-  }
-  const btn = document.querySelector('#chiqimScreen .btn-submit');
-  btn.disabled = true; btn.textContent = 'Сохраняем...';
-  try {
-    const params = new URLSearchParams({ type:'chiqim', payee:val('ch_payee'), expense_type:val('ch_type'), payment_type:val('ch_payment'), amount:val('ch_amount') });
-    const r = await fetch(API + '?' + params);
-    const d = await r.json();
-    if (d.ok) {
-      showToast('✓ Расход сохранён!');
-      document.querySelectorAll('#chiqimScreen input, #chiqimScreen select').forEach(el => { if(el.tagName==='SELECT') el.selectedIndex=0; else el.value=''; });
-      loadBalance();
-      setTimeout(goHome, 1500);
-    } else { showToast('Ошибка', 'error'); }
-  } catch(e) { showToast('Нет соединения', 'error'); }
-  btn.disabled = false; btn.textContent = '✓ Сохранить расход';
+async function submitChiqim(){
+  if(!val('ch_payee')||!val('ch_type')||!val('ch_payment')||!val('ch_amount')){showToast('Заполните все поля','err');return;}
+  const btn=document.querySelector('#chiqimScreen .btn');btn.disabled=true;btn.textContent='Сохраняем...';
+  try{
+    const p=new URLSearchParams({type:'chiqim',payee:val('ch_payee'),expense_type:val('ch_type'),payment_type:val('ch_payment'),amount:val('ch_amount')});
+    const r=await fetch(API+'?'+p); const d=await r.json();
+    if(d.ok){showToast('✓ Расход сохранён!','ok');document.querySelectorAll('#chiqimScreen input,#chiqimScreen select').forEach(el=>{if(el.tagName==='SELECT')el.selectedIndex=0;else el.value='';});loadBalance();setTimeout(goHome,1500);}
+    else showToast('Ошибка','err');
+  }catch(e){showToast('Нет соединения','err');}
+  btn.disabled=false;btn.textContent='✓ Сохранить расход';
 }
 
 init();
