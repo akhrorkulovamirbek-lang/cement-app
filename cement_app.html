@@ -478,7 +478,7 @@ async function loadSupplierReport() {
       dealRows = '<div class="report-section">Последние сделки</div><div class="report-card">';
       d.lastDeals.forEach(deal => {
         dealRows += `<div class="report-row">
-          <span class="report-key">${deal.date} · ${deal.client}</span>
+          <span class="report-key">${deal.date} · ${deal.cement}</span>
           <span class="report-val">${deal.tons} тн · ${fmt(deal.buy)} сум</span>
         </div>`;
       });
