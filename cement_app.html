@@ -65,6 +65,9 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .report-key{font-size:14px;color:var(--muted)}.report-val{font-size:15px;font-weight:600}
 .report-val.green{color:var(--green)}.report-val.red{color:var(--red)}.report-val.blue{color:var(--blue)}.report-val.amber{color:var(--amber)}
 .report-section{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:14px 0 6px}
+/* Download button */
+.btn-download{background:var(--blue);color:#000;font-family:var(--font);font-size:14px;font-weight:600;border:none;border-radius:10px;padding:12px 16px;width:100%;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px}
+.btn-download:active{opacity:.85}
 /* Loader */
 .loader{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:100;transition:opacity .3s}
 .loader.hidden{opacity:0;pointer-events:none}
@@ -389,12 +392,19 @@ async function submitAdd() {
       fillAll();
       document.getElementById('addModal').classList.remove('on');
       showToast('✓ ' + name + ' добавлен!', 'ok');
-    } else showToast('Ошибка: ' + (d.error||''), 'err');
+    } else {
+      const msg = (d.error||'').includes('уже существует')
+        ? '⚠️ ' + name + ' уже есть в списке'
+        : 'Ошибка: ' + (d.error||'');
+      showToast(msg, 'err');
+    }
   } catch(e) { showToast('Нет соединения', 'err'); }
   btn.disabled = false; btn.textContent = 'Добавить';
 }
 
-// ✅ ОБНОВЛЕНО: отчёт по клиенту с марками и оплатами
+let lastClientData = null;
+let lastSupplierData = null;
+
 async function loadClientReport() {
   const name = document.getElementById('r_client').value;
   if(!name) return;
@@ -404,51 +414,120 @@ async function loadClientReport() {
     const r = await fetch(API + '?type=client_report&name=' + encodeURIComponent(name));
     const d = await r.json();
     if(!d.ok) { el.innerHTML = '<div style="color:var(--red);text-align:center;padding:12px">Ошибка: '+(d.error||'')+'</div>'; return; }
-    const fmt = v => Math.round(v).toLocaleString('ru-RU');
-    const debtColor = d.debt > 0 ? 'red' : d.debt < 0 ? 'green' : '';
-
-    // Разбивка по марке цемента
-    let cementRows = '';
-    if (d.bycement && Object.keys(d.bycement).length) {
-      cementRows = '<div class="report-section">По марке цемента</div><div class="report-card">';
-      for (const [cement, info] of Object.entries(d.bycement)) {
-        cementRows += `<div class="report-row">
-          <span class="report-key">${cement}</span>
-          <span class="report-val">${info.tons.toLocaleString('ru-RU')} тн · ${fmt(info.sell)} сум</span>
-        </div>`;
-      }
-      cementRows += '</div>';
-    }
-
-    // Последние оплаты
-    let payRows = '';
-    if (d.lastPayments && d.lastPayments.length) {
-      payRows = '<div class="report-section">Последние оплаты</div><div class="report-card">';
-      d.lastPayments.forEach(p => {
-        payRows += `<div class="report-row">
-          <span class="report-key">${p.date} · ${p.type}</span>
-          <span class="report-val green">${fmt(p.amt)} сум</span>
-        </div>`;
-      });
-      payRows += '</div>';
-    }
-
-    el.innerHTML = `
-      <div class="report-section">Общие данные</div>
-      <div class="report-card">
-        <div class="report-row"><span class="report-key">Сделок</span><span class="report-val blue">${d.deals}</span></div>
-        <div class="report-row"><span class="report-key">Тонн куплено</span><span class="report-val">${d.totalTons.toLocaleString('ru-RU')} тн</span></div>
-        <div class="report-row"><span class="report-key">Продано на сумму</span><span class="report-val">${fmt(d.totalSell)} сум</span></div>
-        <div class="report-row"><span class="report-key">Оплачено</span><span class="report-val green">${fmt(d.totalPaid)} сум</span></div>
-        <div class="report-row"><span class="report-key">Текущий долг</span><span class="report-val ${debtColor}">${fmt(d.debt)} сум</span></div>
-        <div class="report-row"><span class="report-key">Прибыль</span><span class="report-val amber">${fmt(d.totalProfit)} сум</span></div>
-      </div>
-      ${cementRows}
-      ${payRows}`;
+    lastClientData = { name, ...d };
+    el.innerHTML = renderClientReport(name, d) + `<button class="btn-download" onclick="downloadClientReport()">⬇️ Скачать отчёт (PDF)</button>`;
   } catch(e) { el.innerHTML = '<div style="color:var(--red);text-align:center;padding:12px">Нет соединения</div>'; }
 }
 
-// ✅ НОВОЕ: отчёт по поставщику
+function renderClientReport(name, d) {
+  const fmt = v => Math.round(v).toLocaleString('ru-RU');
+  const debtColor = d.debt > 0 ? 'red' : d.debt < 0 ? 'green' : '';
+
+  let cementRows = '';
+  if (d.bycement && Object.keys(d.bycement).length) {
+    cementRows = '<div class="report-section">По марке цемента</div><div class="report-card">';
+    for (const [cement, info] of Object.entries(d.bycement)) {
+      cementRows += `<div class="report-row"><span class="report-key">${cement}</span><span class="report-val">${info.tons.toLocaleString('ru-RU')} тн · ${fmt(info.sell)} сум</span></div>`;
+    }
+    cementRows += '</div>';
+  }
+
+  let payRows = '';
+  if (d.lastPayments && d.lastPayments.length) {
+    payRows = '<div class="report-section">История оплат</div><div class="report-card">';
+    d.lastPayments.forEach(p => {
+      payRows += `<div class="report-row"><span class="report-key">${p.date} · ${p.type}</span><span class="report-val green">${fmt(p.amt)} сум</span></div>`;
+    });
+    payRows += '</div>';
+  }
+
+  return `
+    <div class="report-section">Общие данные</div>
+    <div class="report-card">
+      <div class="report-row"><span class="report-key">Клиент</span><span class="report-val blue">${name}</span></div>
+      <div class="report-row"><span class="report-key">Сделок</span><span class="report-val blue">${d.deals}</span></div>
+      <div class="report-row"><span class="report-key">Тонн куплено</span><span class="report-val">${d.totalTons.toLocaleString('ru-RU')} тн</span></div>
+      <div class="report-row"><span class="report-key">Продано на сумму</span><span class="report-val">${fmt(d.totalSell)} сум</span></div>
+      <div class="report-row"><span class="report-key">Оплачено</span><span class="report-val green">${fmt(d.totalPaid)} сум</span></div>
+      <div class="report-row"><span class="report-key">Текущий долг</span><span class="report-val ${debtColor}">${fmt(d.debt)} сум</span></div>
+    </div>
+    ${cementRows}
+    ${payRows}`;
+}
+
+function downloadClientReport() {
+  if (!lastClientData) return;
+  const d = lastClientData;
+  const fmt = v => Math.round(v).toLocaleString('ru-RU');
+  const today = new Date().toLocaleDateString('ru-RU');
+  const debtColor = d.debt > 0 ? '#ef4444' : d.debt < 0 ? '#22c55e' : '#333';
+
+  let cementTable = '';
+  if (d.bycement && Object.keys(d.bycement).length) {
+    cementTable = `<h3 style="margin:20px 0 8px;color:#333;font-size:14px">По марке цемента</h3>
+    <table><tr><th>Марка</th><th>Тонны</th><th>Сумма</th></tr>`;
+    for (const [cement, info] of Object.entries(d.bycement)) {
+      cementTable += `<tr><td>${cement}</td><td>${info.tons.toLocaleString('ru-RU')} тн</td><td>${fmt(info.sell)} сум</td></tr>`;
+    }
+    cementTable += '</table>';
+  }
+
+  let payTable = '';
+  if (d.lastPayments && d.lastPayments.length) {
+    payTable = `<h3 style="margin:20px 0 8px;color:#333;font-size:14px">История оплат</h3>
+    <table><tr><th>Дата</th><th>Тип</th><th>Сумма</th></tr>`;
+    d.lastPayments.forEach(p => {
+      payTable += `<tr><td>${p.date}</td><td>${p.type}</td><td style="color:#16a34a;font-weight:600">${fmt(p.amt)} сум</td></tr>`;
+    });
+    payTable += '</table>';
+  }
+
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <title>Отчёт — ${d.name}</title>
+  <style>
+    body{font-family:Arial,sans-serif;padding:32px;color:#333;max-width:700px;margin:0 auto}
+    .header{border-bottom:3px solid #16a34a;padding-bottom:16px;margin-bottom:24px}
+    .header h1{font-size:22px;color:#16a34a;margin:0 0 4px}
+    .header p{color:#666;font-size:13px;margin:0}
+    .summary{background:#f8f9fa;border-radius:8px;padding:16px;margin-bottom:20px}
+    .row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #e5e7eb}
+    .row:last-child{border-bottom:none}
+    .key{color:#666;font-size:14px}.val{font-weight:700;font-size:14px}
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    th{background:#16a34a;color:#fff;padding:8px 12px;text-align:left}
+    td{padding:8px 12px;border-bottom:1px solid #e5e7eb}
+    tr:nth-child(even) td{background:#f9fafb}
+    .debt{color:${debtColor};font-size:20px;font-weight:800}
+    .footer{margin-top:32px;text-align:center;color:#999;font-size:12px;border-top:1px solid #e5e7eb;padding-top:16px}
+    @media print{body{padding:16px}.no-print{display:none}}
+  </style></head><body>
+  <div class="header">
+    <h1>📊 Отчёт по клиенту</h1>
+    <p>Дата формирования: ${today} · Цемент Учёт</p>
+  </div>
+  <div class="summary">
+    <div class="row"><span class="key">Клиент</span><span class="val">${d.name}</span></div>
+    <div class="row"><span class="key">Сделок</span><span class="val">${d.deals}</span></div>
+    <div class="row"><span class="key">Тонн куплено</span><span class="val">${d.totalTons.toLocaleString('ru-RU')} тн</span></div>
+    <div class="row"><span class="key">Продано на сумму</span><span class="val">${fmt(d.totalSell)} сум</span></div>
+    <div class="row"><span class="key">Оплачено</span><span class="val" style="color:#16a34a">${fmt(d.totalPaid)} сум</span></div>
+    <div class="row"><span class="key">Текущий долг</span><span class="val debt">${fmt(d.debt)} сум</span></div>
+  </div>
+  ${cementTable}
+  ${payTable}
+  <div class="footer">Сформировано автоматически · реализация_2026</div>
+  <script>window.onload=()=>window.print()<\/script>
+  </body></html>`;
+
+  const blob = new Blob([html], {type:'text/html'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Отчёт_${d.name}_${today.replace(/\./g,'-')}.html`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 async function loadSupplierReport() {
   const name = document.getElementById('r_supplier').value;
   if(!name) return;
@@ -458,45 +537,118 @@ async function loadSupplierReport() {
     const r = await fetch(API + '?type=supplier_report&name=' + encodeURIComponent(name));
     const d = await r.json();
     if(!d.ok) { el.innerHTML = '<div style="color:var(--red);text-align:center;padding:12px">Ошибка: '+(d.error||'')+'</div>'; return; }
-    const fmt = v => Math.round(v).toLocaleString('ru-RU');
-    const debtColor = d.debt > 0 ? 'red' : 'green';
-
-    let cementRows = '';
-    if (d.bycement && Object.keys(d.bycement).length) {
-      cementRows = '<div class="report-section">По марке цемента</div><div class="report-card">';
-      for (const [cement, info] of Object.entries(d.bycement)) {
-        cementRows += `<div class="report-row">
-          <span class="report-key">${cement}</span>
-          <span class="report-val">${info.tons.toLocaleString('ru-RU')} тн · ${fmt(info.buy)} сум</span>
-        </div>`;
-      }
-      cementRows += '</div>';
-    }
-
-    let dealRows = '';
-    if (d.lastDeals && d.lastDeals.length) {
-      dealRows = '<div class="report-section">Последние сделки</div><div class="report-card">';
-      d.lastDeals.forEach(deal => {
-        dealRows += `<div class="report-row">
-          <span class="report-key">${deal.date} · ${deal.cement}</span>
-          <span class="report-val">${deal.tons} тн · ${fmt(deal.buy)} сум</span>
-        </div>`;
-      });
-      dealRows += '</div>';
-    }
-
-    el.innerHTML = `
-      <div class="report-section">Общие данные</div>
-      <div class="report-card">
-        <div class="report-row"><span class="report-key">Сделок</span><span class="report-val blue">${d.deals}</span></div>
-        <div class="report-row"><span class="report-key">Тонн закуплено</span><span class="report-val">${d.totalTons.toLocaleString('ru-RU')} тн</span></div>
-        <div class="report-row"><span class="report-key">Сумма закупки</span><span class="report-val">${fmt(d.totalBuy)} сум</span></div>
-        <div class="report-row"><span class="report-key">Уже оплачено</span><span class="report-val green">${fmt(d.totalPaid)} сум</span></div>
-        <div class="report-row"><span class="report-key">Долг поставщику</span><span class="report-val ${debtColor}">${fmt(d.debt)} сум</span></div>
-      </div>
-      ${cementRows}
-      ${dealRows}`;
+    lastSupplierData = { name, ...d };
+    el.innerHTML = renderSupplierReport(name, d) + `<button class="btn-download" onclick="downloadSupplierReport()">⬇️ Скачать отчёт (PDF)</button>`;
   } catch(e) { el.innerHTML = '<div style="color:var(--red);text-align:center;padding:12px">Нет соединения</div>'; }
+}
+
+function renderSupplierReport(name, d) {
+  const fmt = v => Math.round(v).toLocaleString('ru-RU');
+  const debtColor = d.debt > 0 ? 'red' : 'green';
+
+  let cementRows = '';
+  if (d.bycement && Object.keys(d.bycement).length) {
+    cementRows = '<div class="report-section">По марке цемента</div><div class="report-card">';
+    for (const [cement, info] of Object.entries(d.bycement)) {
+      cementRows += `<div class="report-row"><span class="report-key">${cement}</span><span class="report-val">${info.tons.toLocaleString('ru-RU')} тн · ${fmt(info.buy)} сум</span></div>`;
+    }
+    cementRows += '</div>';
+  }
+
+  let dealRows = '';
+  if (d.lastDeals && d.lastDeals.length) {
+    dealRows = '<div class="report-section">История закупок</div><div class="report-card">';
+    d.lastDeals.forEach(deal => {
+      dealRows += `<div class="report-row"><span class="report-key">${deal.date} · ${deal.cement}</span><span class="report-val">${deal.tons} тн · ${fmt(deal.buy)} сум</span></div>`;
+    });
+    dealRows += '</div>';
+  }
+
+  return `
+    <div class="report-section">Общие данные</div>
+    <div class="report-card">
+      <div class="report-row"><span class="report-key">Поставщик</span><span class="report-val blue">${name}</span></div>
+      <div class="report-row"><span class="report-key">Сделок</span><span class="report-val blue">${d.deals}</span></div>
+      <div class="report-row"><span class="report-key">Тонн закуплено</span><span class="report-val">${d.totalTons.toLocaleString('ru-RU')} тн</span></div>
+      <div class="report-row"><span class="report-key">Сумма закупки</span><span class="report-val">${fmt(d.totalBuy)} сум</span></div>
+      <div class="report-row"><span class="report-key">Уже оплачено</span><span class="report-val green">${fmt(d.totalPaid)} сум</span></div>
+      <div class="report-row"><span class="report-key">Долг поставщику</span><span class="report-val ${debtColor}">${fmt(d.debt)} сум</span></div>
+    </div>
+    ${cementRows}
+    ${dealRows}`;
+}
+
+function downloadSupplierReport() {
+  if (!lastSupplierData) return;
+  const d = lastSupplierData;
+  const fmt = v => Math.round(v).toLocaleString('ru-RU');
+  const today = new Date().toLocaleDateString('ru-RU');
+  const debtColor = d.debt > 0 ? '#ef4444' : '#16a34a';
+
+  let cementTable = '';
+  if (d.bycement && Object.keys(d.bycement).length) {
+    cementTable = `<h3 style="margin:20px 0 8px;color:#333;font-size:14px">По марке цемента</h3>
+    <table><tr><th>Марка</th><th>Тонны</th><th>Сумма закупки</th></tr>`;
+    for (const [cement, info] of Object.entries(d.bycement)) {
+      cementTable += `<tr><td>${cement}</td><td>${info.tons.toLocaleString('ru-RU')} тн</td><td>${fmt(info.buy)} сум</td></tr>`;
+    }
+    cementTable += '</table>';
+  }
+
+  let dealTable = '';
+  if (d.lastDeals && d.lastDeals.length) {
+    dealTable = `<h3 style="margin:20px 0 8px;color:#333;font-size:14px">История закупок</h3>
+    <table><tr><th>Дата</th><th>Марка</th><th>Тонны</th><th>Сумма</th></tr>`;
+    d.lastDeals.forEach(deal => {
+      dealTable += `<tr><td>${deal.date}</td><td>${deal.cement}</td><td>${deal.tons} тн</td><td>${fmt(deal.buy)} сум</td></tr>`;
+    });
+    dealTable += '</table>';
+  }
+
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <title>Отчёт — ${d.name}</title>
+  <style>
+    body{font-family:Arial,sans-serif;padding:32px;color:#333;max-width:700px;margin:0 auto}
+    .header{border-bottom:3px solid #2563eb;padding-bottom:16px;margin-bottom:24px}
+    .header h1{font-size:22px;color:#2563eb;margin:0 0 4px}
+    .header p{color:#666;font-size:13px;margin:0}
+    .summary{background:#f8f9fa;border-radius:8px;padding:16px;margin-bottom:20px}
+    .row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #e5e7eb}
+    .row:last-child{border-bottom:none}
+    .key{color:#666;font-size:14px}.val{font-weight:700;font-size:14px}
+    table{width:100%;border-collapse:collapse;font-size:13px}
+    th{background:#2563eb;color:#fff;padding:8px 12px;text-align:left}
+    td{padding:8px 12px;border-bottom:1px solid #e5e7eb}
+    tr:nth-child(even) td{background:#f9fafb}
+    .debt{color:${debtColor};font-size:20px;font-weight:800}
+    .footer{margin-top:32px;text-align:center;color:#999;font-size:12px;border-top:1px solid #e5e7eb;padding-top:16px}
+    @media print{body{padding:16px}}
+  </style></head><body>
+  <div class="header">
+    <h1>🏭 Отчёт по поставщику</h1>
+    <p>Дата формирования: ${today} · Цемент Учёт</p>
+  </div>
+  <div class="summary">
+    <div class="row"><span class="key">Поставщик</span><span class="val">${d.name}</span></div>
+    <div class="row"><span class="key">Сделок</span><span class="val">${d.deals}</span></div>
+    <div class="row"><span class="key">Тонн закуплено</span><span class="val">${d.totalTons.toLocaleString('ru-RU')} тн</span></div>
+    <div class="row"><span class="key">Сумма закупки</span><span class="val">${fmt(d.totalBuy)} сум</span></div>
+    <div class="row"><span class="key">Уже оплачено</span><span class="val" style="color:#16a34a">${fmt(d.totalPaid)} сум</span></div>
+    <div class="row"><span class="key">Долг поставщику</span><span class="val debt">${fmt(d.debt)} сум</span></div>
+  </div>
+  ${cementTable}
+  ${dealTable}
+  <div class="footer">Сформировано автоматически · реализация_2026</div>
+  <script>window.onload=()=>window.print()<\/script>
+  </body></html>`;
+
+  const blob = new Blob([html], {type:'text/html'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `Отчёт_${d.name}_${today.replace(/\./g,'-')}.html`;
+  a.click();
+  URL.revokeObjectURL(url);
 }
 
 function calcProfit() {
