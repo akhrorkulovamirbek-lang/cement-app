@@ -45,6 +45,22 @@ select:focus,input:focus{border-color:var(--blue)}
 input[type=date]{color-scheme:dark}
 select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237070a0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center;padding-right:40px}
 .add-btn{width:44px;height:48px;flex-shrink:0;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--green);font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer}
+/* Searchable select */
+.sel-wrap{position:relative;width:100%}
+.sel-search{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:10px 10px 0 0;color:var(--text);font-family:var(--font);font-size:15px;padding:12px 16px;outline:none;border-bottom:1px solid var(--border);display:none}
+.sel-search.on{display:block}
+.sel-search:focus{border-color:var(--blue)}
+.sel-dropdown{position:absolute;left:0;right:0;top:100%;background:var(--surface);border:1px solid var(--blue);border-top:none;border-radius:0 0 10px 10px;max-height:220px;overflow-y:auto;z-index:150;display:none;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.sel-dropdown.on{display:block}
+.sel-option{padding:12px 16px;font-size:15px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .1s}
+.sel-option:last-child{border-bottom:none}
+.sel-option:hover,.sel-option.focused{background:var(--surface2)}
+.sel-option.selected{color:var(--green);font-weight:600}
+.sel-val{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--font);font-size:16px;padding:14px 40px 14px 16px;outline:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:border-color .15s;position:relative}
+.sel-val.on{border-color:var(--blue);border-radius:10px 10px 0 0}
+.sel-val .sel-placeholder{color:var(--muted)}
+.sel-val .sel-arrow{color:var(--muted);font-size:12px;position:absolute;right:16px}
+.sel-empty{padding:12px 16px;color:var(--muted);font-size:14px;text-align:center}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .btn{background:var(--green);color:#000;font-family:var(--font);font-size:16px;font-weight:600;border:none;border-radius:var(--radius);padding:16px;width:100%;cursor:pointer;transition:opacity .15s;margin-top:4px}
 .btn:disabled{opacity:.4;cursor:not-allowed}
@@ -169,10 +185,10 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 <div class="screen" id="savdoScreen">
   <div class="form">
     <div><div class="flabel">Клиент</div>
-      <div class="input-row"><select id="s_client"><option value="">— выберите —</option></select><div class="add-btn" onclick="openModal('client')">+</div></div>
+      <div class="input-row"><div class="sel-wrap" id="sw_s_client"></div><div class="add-btn" onclick="openModal('client')">+</div></div>
     </div>
     <div><div class="flabel">Поставщик</div>
-      <div class="input-row"><select id="s_supplier"><option value="">— выберите —</option></select><div class="add-btn" onclick="openModal('supplier')">+</div></div>
+      <div class="input-row"><div class="sel-wrap" id="sw_s_supplier"></div><div class="add-btn" onclick="openModal('supplier')">+</div></div>
     </div>
     <div><div class="flabel">Марка цемента</div><select id="s_cement"><option value="">— выберите —</option></select></div>
     <div><div class="flabel">Номер авто</div><input type="text" id="s_auto" placeholder="30 678 YBA"></div>
@@ -192,7 +208,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 <div class="screen" id="kirimScreen">
   <div class="form">
     <div><div class="flabel">Клиент</div>
-      <div class="input-row"><select id="k_client"><option value="">— выберите —</option></select><div class="add-btn" onclick="openModal('client')">+</div></div>
+      <div class="input-row"><div class="sel-wrap" id="sw_k_client"></div><div class="add-btn" onclick="openModal('client')">+</div></div>
     </div>
     <div><div class="flabel">Тип оплаты</div>
       <select id="k_payment"><option value="">— выберите —</option><option value="накд">Наличные (накд)</option><option value="перечисление">Банк (перечисление)</option></select>
@@ -208,7 +224,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
   <div class="form">
     <div>
       <div class="flabel" id="ch_payee_label">Поставщик / получатель</div>
-      <div class="input-row"><select id="ch_payee"><option value="">— выберите —</option></select><div class="add-btn" id="ch_add_btn" onclick="openModal('supplier')">+</div></div>
+      <div class="input-row"><div class="sel-wrap" id="sw_ch_payee"></div><div class="add-btn" id="ch_add_btn" onclick="openModal('supplier')">+</div></div>
     </div>
     <div><div class="flabel">Категория</div>
       <select id="ch_type" onchange="onChiqimTypeChange()">
@@ -230,7 +246,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 <!-- REPORT CLIENT -->
 <div class="screen" id="reportClientScreen">
   <div class="form">
-    <div><div class="flabel">Клиент</div><select id="r_client" onchange="loadClientReport()"><option value="">— выберите —</option></select></div>
+    <div><div class="flabel">Клиент</div><div class="sel-wrap" id="sw_r_client"></div></div>
     <div id="reportClientResult"></div>
   </div>
 </div>
@@ -238,7 +254,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 <!-- REPORT SUPPLIER -->
 <div class="screen" id="reportSupplierScreen">
   <div class="form">
-    <div><div class="flabel">Поставщик</div><select id="r_supplier" onchange="loadSupplierReport()"><option value="">— выберите —</option></select></div>
+    <div><div class="flabel">Поставщик</div><div class="sel-wrap" id="sw_r_supplier"></div></div>
     <div id="reportSupplierResult"></div>
   </div>
 </div>
@@ -267,6 +283,118 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 </div>
 
 <script>
+// ================================================================
+//  SEARCHABLE SELECT — компонент поиска с выпадающим списком
+// ================================================================
+class SearchableSelect {
+  constructor(wrapperId, { placeholder='— выберите —', onChange=null } = {}) {
+    this.wrapper = document.getElementById(wrapperId);
+    this.placeholder = placeholder;
+    this.onChange = onChange;
+    this._value = '';
+    this._items = [];
+    this._build();
+  }
+
+  _build() {
+    this.wrapper.innerHTML = `
+      <div class="sel-val" id="${this.wrapper.id}_val" onclick="this.parentElement._sel.toggle()">
+        <span class="sel-placeholder">${this.placeholder}</span>
+        <span class="sel-arrow">▼</span>
+      </div>
+      <input class="sel-search" id="${this.wrapper.id}_search" placeholder="🔍 Поиск..." oninput="this.parentElement._sel._filter(this.value)">
+      <div class="sel-dropdown" id="${this.wrapper.id}_drop"></div>`;
+    this.wrapper._sel = this;
+    this.valEl    = this.wrapper.querySelector('.sel-val');
+    this.searchEl = this.wrapper.querySelector('.sel-search');
+    this.dropEl   = this.wrapper.querySelector('.sel-dropdown');
+    // Закрываем при клике снаружи
+    document.addEventListener('click', e => { if (!this.wrapper.contains(e.target)) this.close(); });
+  }
+
+  setItems(items) {
+    this._items = items;
+    this._render(items);
+  }
+
+  _render(items) {
+    if (!items.length) {
+      this.dropEl.innerHTML = '<div class="sel-empty">Ничего не найдено</div>';
+      return;
+    }
+    this.dropEl.innerHTML = items.map(item =>
+      `<div class="sel-option${item === this._value ? ' selected' : ''}" onclick="this.closest('.sel-wrap')._sel._select('${item.replace(/'/g, "\'")}')">${item}</div>`
+    ).join('');
+  }
+
+  _filter(query) {
+    const q = query.toLowerCase();
+    const filtered = q ? this._items.filter(i => i.toLowerCase().includes(q)) : this._items;
+    this._render(filtered);
+  }
+
+  _select(value) {
+    this._value = value;
+    this.valEl.innerHTML = `<span>${value}</span><span class="sel-arrow">▼</span>`;
+    this.valEl.classList.remove('sel-placeholder');
+    this.close();
+    if (this.onChange) this.onChange(value);
+  }
+
+  toggle() {
+    if (this.dropEl.classList.contains('on')) this.close();
+    else this.open();
+  }
+
+  open() {
+    // Закрываем все остальные
+    document.querySelectorAll('.sel-dropdown.on').forEach(d => {
+      if (d !== this.dropEl) {
+        d.classList.remove('on');
+        d.previousElementSibling.classList.remove('on');
+        d.previousElementSibling.previousElementSibling.classList.remove('on');
+      }
+    });
+    this.valEl.classList.add('on');
+    this.searchEl.classList.add('on');
+    this.dropEl.classList.add('on');
+    this.searchEl.value = '';
+    this._render(this._items);
+    setTimeout(() => this.searchEl.focus(), 50);
+  }
+
+  close() {
+    this.valEl.classList.remove('on');
+    this.searchEl.classList.remove('on');
+    this.dropEl.classList.remove('on');
+  }
+
+  get value() { return this._value; }
+
+  set value(v) {
+    this._value = v;
+    if (v) {
+      this.valEl.innerHTML = `<span>${v}</span><span class="sel-arrow">▼</span>`;
+    } else {
+      this.valEl.innerHTML = `<span class="sel-placeholder">${this.placeholder}</span><span class="sel-arrow">▼</span>`;
+    }
+  }
+
+  reset() { this.value = ''; }
+}
+
+// Реестр всех компонентов
+const SELECTS = {};
+
+function initSelects() {
+  SELECTS.s_client   = new SearchableSelect('sw_s_client',   { onChange: () => {} });
+  SELECTS.s_supplier = new SearchableSelect('sw_s_supplier',  { onChange: () => {} });
+  SELECTS.k_client   = new SearchableSelect('sw_k_client',   { onChange: () => {} });
+  SELECTS.ch_payee   = new SearchableSelect('sw_ch_payee',   { onChange: () => {} });
+  SELECTS.r_client   = new SearchableSelect('sw_r_client',   { onChange: () => loadClientReport() });
+  SELECTS.r_supplier = new SearchableSelect('sw_r_supplier',  { onChange: () => loadSupplierReport() });
+}
+
 const API = 'https://script.google.com/macros/s/AKfycbyecpjKA5w7vA9G8exvZ9BIXtxlUkFwtoW7x9bIso8vMwhBcfm7hZXi9DI8djE8y1KQMg/exec';
 let config = { clients:[], suppliers:[], cement:[], payment:[] };
 let modalType = '';
@@ -290,6 +418,7 @@ const HARDCODED = {
 };
 
 async function init() {
+  initSelects();
   config = { ...HARDCODED };
   fillAll();
   setDates();
@@ -307,13 +436,15 @@ async function init() {
 }
 
 function fillAll() {
-  fillSelect('s_client',  config.clients);
-  fillSelect('s_supplier',config.suppliers);
+  // Searchable selects
+  if (SELECTS.s_client)   SELECTS.s_client.setItems(config.clients);
+  if (SELECTS.s_supplier) SELECTS.s_supplier.setItems(config.suppliers);
+  if (SELECTS.k_client)   SELECTS.k_client.setItems(config.clients);
+  if (SELECTS.ch_payee)   SELECTS.ch_payee.setItems(config.suppliers);
+  if (SELECTS.r_client)   SELECTS.r_client.setItems(config.clients);
+  if (SELECTS.r_supplier) SELECTS.r_supplier.setItems(config.suppliers);
+  // Обычные select (марка цемента, тип оплаты)
   fillSelect('s_cement',  config.cement);
-  fillSelect('k_client',  config.clients);
-  fillSelect('ch_payee',  config.suppliers);
-  fillSelect('r_client',  config.clients);
-  fillSelect('r_supplier',config.suppliers);
 }
 
 function fillSelect(id, items) {
@@ -340,14 +471,14 @@ function onChiqimTypeChange() {
   const type   = document.getElementById('ch_type').value;
   const label  = document.getElementById('ch_payee_label');
   const addBtn = document.getElementById('ch_add_btn');
-  document.getElementById('ch_payee').selectedIndex = 0;
+  if (SELECTS.ch_payee) SELECTS.ch_payee.reset();
   if (type === 'возврат') {
     label.textContent = 'Клиент (кому возврат)';
-    fillSelect('ch_payee', config.clients);
+    if (SELECTS.ch_payee) SELECTS.ch_payee.setItems(config.clients);
     addBtn.onclick = () => openModal('client');
   } else {
     label.textContent = 'Поставщик / получатель';
-    fillSelect('ch_payee', config.suppliers);
+    if (SELECTS.ch_payee) SELECTS.ch_payee.setItems(config.suppliers);
     addBtn.onclick = () => openModal('supplier');
   }
 }
@@ -415,7 +546,7 @@ async function loadClientReport() {
     const d = await r.json();
     if(!d.ok) { el.innerHTML = '<div style="color:var(--red);text-align:center;padding:12px">Ошибка: '+(d.error||'')+'</div>'; return; }
     lastClientData = { name, ...d };
-    el.innerHTML = renderClientReport(name, d) + `<button class="btn-download" onclick="downloadClientReport()">🖨️ Скачать PDF</button>`;
+    el.innerHTML = renderClientReport(name, d) + `<button id="btnPdfClient" class="btn-download" onclick="downloadClientReport()">🖨️ Скачать PDF</button>`;
   } catch(e) { el.innerHTML = '<div style="color:var(--red);text-align:center;padding:12px">Нет соединения</div>'; }
 }
 
@@ -465,7 +596,32 @@ function fmtRuDate(str) {
   return d.toLocaleDateString('ru-RU', { day:'2-digit', month:'2-digit', year:'numeric' });
 }
 
-function openReportPDF(type) {
+async function openReportPDF(type) {
+  const data = type === 'client' ? lastClientData : lastSupplierData;
+  if (!data) return;
+
+  // Показываем кнопку загрузки
+  const btnId = type === 'client' ? 'btnPdfClient' : 'btnPdfSupplier';
+  const btn = document.getElementById(btnId);
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Генерируем PDF...'; }
+
+  try {
+    const endpoint = type === 'client' ? 'client_pdf' : 'supplier_pdf';
+    const r = await fetch(API + '?type=' + endpoint + '&name=' + encodeURIComponent(data.name));
+    const d = await r.json();
+    if (d.ok && d.url) {
+      // Открываем ссылку на скачивание
+      window.location.href = d.url;
+    } else {
+      showToast('Ошибка генерации PDF', 'err');
+    }
+  } catch(e) {
+    showToast('Нет соединения', 'err');
+  }
+  if (btn) { btn.disabled = false; btn.textContent = '🖨️ Скачать PDF'; }
+}
+
+function openReportPDF_unused(type) {
   const data = type === 'client' ? lastClientData : lastSupplierData;
   if (!data) return;
   const fmt = v => Math.round(v).toLocaleString('ru-RU');
@@ -593,7 +749,12 @@ function showToast(msg,type='ok'){
   t.textContent=msg; t.className='toast '+type+' on';
   setTimeout(()=>t.classList.remove('on'),3000);
 }
-function val(id){return document.getElementById(id).value.trim();}
+function val(id) {
+  // Если есть SearchableSelect — берём из него
+  if (SELECTS[id]) return SELECTS[id].value.trim();
+  const el = document.getElementById(id);
+  return el ? el.value.trim() : '';
+}
 
 async function submitSavdo(){
   if(!val('s_client')||!val('s_supplier')||!val('s_cement')||!val('s_auto')||!val('s_tons')||!val('s_buy')||!val('s_sell')){showToast('Заполните все поля','err');return;}
@@ -604,6 +765,7 @@ async function submitSavdo(){
     if(d.ok){
       showToast('✓ Фойда: '+Math.round(d.profit).toLocaleString('ru-RU')+' сум','ok');
       document.querySelectorAll('#savdoScreen input,#savdoScreen select').forEach(el=>{if(el.tagName==='SELECT')el.selectedIndex=0;else el.value='';});
+      SELECTS.s_client.reset(); SELECTS.s_supplier.reset();
       document.getElementById('s_date').value=today();
       document.getElementById('profitBox').classList.remove('on');
       loadBalance();
@@ -621,6 +783,7 @@ async function submitKirim(){
     if(d.ok){
       showToast('✓ Приход сохранён!','ok');
       document.querySelectorAll('#kirimScreen input,#kirimScreen select').forEach(el=>{if(el.tagName==='SELECT')el.selectedIndex=0;else el.value='';});
+      SELECTS.k_client.reset();
       document.getElementById('k_date').value=today();
       loadBalance();
       setTimeout(()=>{goHome();btn.disabled=false;btn.textContent='✓ Сохранить приход';},1500);
@@ -638,7 +801,7 @@ async function submitChiqim(){
       showToast('✓ Расход сохранён!','ok');
       document.querySelectorAll('#chiqimScreen input,#chiqimScreen select').forEach(el=>{if(el.tagName==='SELECT')el.selectedIndex=0;else el.value='';});
       document.getElementById('ch_date').value=today();
-      onChiqimTypeChange();
+      onChiqimTypeChange(); SELECTS.ch_payee.reset();
       loadBalance();
       setTimeout(()=>{goHome();btn.disabled=false;btn.textContent='✓ Сохранить расход';},1500);
     } else { showToast('Ошибка','err'); btn.disabled=false; btn.textContent='✓ Сохранить расход'; }
