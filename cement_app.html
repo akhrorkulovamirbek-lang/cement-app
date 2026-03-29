@@ -8,7 +8,6 @@
 <meta name="apple-mobile-web-app-title" content="Цемент">
 <title>Учёт цемента</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -416,7 +415,7 @@ async function loadClientReport() {
     const d = await r.json();
     if(!d.ok) { el.innerHTML = '<div style="color:var(--red);text-align:center;padding:12px">Ошибка: '+(d.error||'')+'</div>'; return; }
     lastClientData = { name, ...d };
-    el.innerHTML = renderClientReport(name, d) + `<button class="btn-download" onclick="downloadClientReport()">⬇️ Скачать отчёт (PDF)</button>`;
+    el.innerHTML = renderClientReport(name, d) + `<button class="btn-download" onclick="downloadClientReport()">🖨️ Скачать PDF</button>`;
   } catch(e) { el.innerHTML = '<div style="color:var(--red);text-align:center;padding:12px">Нет соединения</div>'; }
 }
 
@@ -466,206 +465,117 @@ function fmtRuDate(str) {
   return d.toLocaleDateString('ru-RU', { day:'2-digit', month:'2-digit', year:'numeric' });
 }
 
-function generatePDF(type) {
+function openReportPDF(type) {
   const data = type === 'client' ? lastClientData : lastSupplierData;
   if (!data) return;
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
   const fmt = v => Math.round(v).toLocaleString('ru-RU');
   const today = new Date().toLocaleDateString('ru-RU');
-  const pageW = doc.internal.pageSize.getWidth();
-  const margin = 15;
-  const colW = pageW - margin*2;
-  let y = 20;
+  const isClient = type === 'client';
+  const accentColor = isClient ? '#16a34a' : '#2563eb';
+  const title = isClient ? 'Отчёт по клиенту' : 'Отчёт по поставщику';
+  const debtColor = data.debt > 0 ? '#ef4444' : '#16a34a';
 
-  // Шрифт (jsPDF поддерживает только Latin по умолчанию — используем встроенный)
-  doc.setFont('helvetica');
-
-  // Заголовок
-  const title = type === 'client' ? 'Otchet po klientu' : 'Otchet po postavshiku';
-  const name = data.name;
-  doc.setFillColor(22, 163, 74);
-  doc.rect(margin, y-6, colW, 14, 'F');
-  doc.setTextColor(255,255,255);
-  doc.setFontSize(16); doc.setFont('helvetica','bold');
-  doc.text(title, margin+4, y+3);
-  y += 14;
-
-  doc.setTextColor(100,100,100);
-  doc.setFontSize(9); doc.setFont('helvetica','normal');
-  doc.text('Data: ' + today + '   Tsement Uchet', margin, y+4);
-  y += 12;
-
-  // Функция строки
-  function row(label, value, valueColor) {
-    doc.setFillColor(248,249,250);
-    doc.rect(margin, y, colW, 8, 'F');
-    doc.setDrawColor(229,231,235);
-    doc.rect(margin, y, colW, 8, 'S');
-    doc.setTextColor(100,100,100); doc.setFontSize(10); doc.setFont('helvetica','normal');
-    doc.text(label, margin+3, y+5.5);
-    if (valueColor) doc.setTextColor(...valueColor);
-    else doc.setTextColor(30,30,30);
-    doc.setFont('helvetica','bold');
-    doc.text(value, pageW-margin-3, y+5.5, {align:'right'});
-    doc.setFont('helvetica','normal');
-    y += 8;
-  }
-
-  // Основные данные
-  doc.setTextColor(30,30,30); doc.setFontSize(11); doc.setFont('helvetica','bold');
-  doc.text('Imya: ' + name, margin, y+5);
-  y += 10;
-
-  if (type === 'client') {
-    row('Sdelok:', data.deals.toString());
-    row('Tonn kupleno:', data.totalTons.toLocaleString('ru-RU') + ' tn');
-    row('Prodano na summu:', fmt(data.totalSell) + ' sum');
-    row('Oplacheno:', fmt(data.totalPaid) + ' sum', [22,163,74]);
-    const dc = data.debt > 0 ? [239,68,68] : [22,163,74];
-    row('Tekuschiy dolg:', fmt(data.debt) + ' sum', dc);
+  let summaryRows = '';
+  if (isClient) {
+    summaryRows = `
+      <tr><td>Клиент</td><td><b>${data.name}</b></td></tr>
+      <tr><td>Сделок</td><td>${data.deals}</td></tr>
+      <tr><td>Тонн куплено</td><td>${data.totalTons.toLocaleString('ru-RU')} тн</td></tr>
+      <tr><td>Продано на сумму</td><td>${fmt(data.totalSell)} сум</td></tr>
+      <tr><td>Оплачено</td><td style="color:#16a34a;font-weight:700">${fmt(data.totalPaid)} сум</td></tr>
+      <tr><td>Текущий долг</td><td style="color:${debtColor};font-weight:700;font-size:16px">${fmt(data.debt)} сум</td></tr>`;
   } else {
-    row('Sdelok:', data.deals.toString());
-    row('Tonn zakupleno:', data.totalTons.toLocaleString('ru-RU') + ' tn');
-    row('Summa zakupki:', fmt(data.totalBuy) + ' sum');
-    row('Oplacheno:', fmt(data.totalPaid) + ' sum', [22,163,74]);
-    const dc = data.debt > 0 ? [239,68,68] : [22,163,74];
-    row('Dolg postavshiku:', fmt(data.debt) + ' sum', dc);
+    summaryRows = `
+      <tr><td>Поставщик</td><td><b>${data.name}</b></td></tr>
+      <tr><td>Сделок</td><td>${data.deals}</td></tr>
+      <tr><td>Тонн закуплено</td><td>${data.totalTons.toLocaleString('ru-RU')} тн</td></tr>
+      <tr><td>Сумма закупки</td><td>${fmt(data.totalBuy)} сум</td></tr>
+      <tr><td>Уже оплачено</td><td style="color:#16a34a;font-weight:700">${fmt(data.totalPaid)} сум</td></tr>
+      <tr><td>Долг поставщику</td><td style="color:${debtColor};font-weight:700;font-size:16px">${fmt(data.debt)} сум</td></tr>`;
   }
-  y += 6;
 
-  // Таблица по марке цемента
+  let cementTable = '';
   if (data.bycement && Object.keys(data.bycement).length) {
-    doc.setFontSize(11); doc.setFont('helvetica','bold'); doc.setTextColor(30,30,30);
-    doc.text('Po marke tsementa:', margin, y); y += 5;
-    // Заголовок таблицы
-    doc.setFillColor(22,163,74); doc.rect(margin, y, colW, 7, 'F');
-    doc.setTextColor(255,255,255); doc.setFontSize(9); doc.setFont('helvetica','bold');
-    doc.text('Marka', margin+3, y+5);
-    doc.text('Tonny', margin+colW*0.45, y+5);
-    doc.text('Summa', margin+colW*0.72, y+5);
-    y += 7;
-    let even = false;
+    cementTable = '<h3>По марке цемента</h3><table class="data"><tr><th>Марка</th><th>Тонны</th><th>Сумма</th></tr>';
     for (const [cement, info] of Object.entries(data.bycement)) {
-      if (even) { doc.setFillColor(249,250,251); doc.rect(margin, y, colW, 7, 'F'); }
-      doc.setTextColor(50,50,50); doc.setFontSize(9); doc.setFont('helvetica','normal');
-      doc.text(cement, margin+3, y+5);
-      doc.text(info.tons.toLocaleString('ru-RU') + ' tn', margin+colW*0.45, y+5);
-      doc.text(fmt(type==='client'?info.sell:info.buy) + ' sum', margin+colW*0.72, y+5);
-      doc.setDrawColor(229,231,235); doc.rect(margin, y, colW, 7, 'S');
-      y += 7; even = !even;
+      const sum = isClient ? info.sell : info.buy;
+      cementTable += `<tr><td>${cement}</td><td>${info.tons.toLocaleString('ru-RU')} тн</td><td>${fmt(sum)} сум</td></tr>`;
     }
-    y += 5;
+    cementTable += '</table>';
   }
 
-  // История оплат / сделок
-  const histArr = type === 'client' ? data.lastPayments : data.lastDeals;
-  const histLabel = type === 'client' ? 'Istoriya oplat:' : 'Istoriya zakupok:';
+  const histArr = isClient ? data.lastPayments : data.lastDeals;
+  const histTitle = isClient ? 'История оплат' : 'История закупок';
+  let histTable = '';
   if (histArr && histArr.length) {
-    // Новая страница если мало места
-    if (y > 220) { doc.addPage(); y = 20; }
-    doc.setFontSize(11); doc.setFont('helvetica','bold'); doc.setTextColor(30,30,30);
-    doc.text(histLabel, margin, y); y += 5;
-    doc.setFillColor(22,163,74); doc.rect(margin, y, colW, 7, 'F');
-    doc.setTextColor(255,255,255); doc.setFontSize(9); doc.setFont('helvetica','bold');
-    if (type === 'client') {
-      doc.text('Data', margin+3, y+5);
-      doc.text('Tip', margin+colW*0.35, y+5);
-      doc.text('Summa', margin+colW*0.72, y+5);
+    if (isClient) {
+      histTable = '<h3>' + histTitle + '</h3><table class="data"><tr><th>Дата</th><th>Тип оплаты</th><th>Сумма</th></tr>';
+      histArr.forEach(p => {
+        histTable += `<tr><td>${p.date||''}</td><td>${p.type||''}</td><td style="color:#16a34a;font-weight:600">${fmt(p.amt)} сум</td></tr>`;
+      });
     } else {
-      doc.text('Data', margin+3, y+5);
-      doc.text('Marka', margin+colW*0.3, y+5);
-      doc.text('Tonny', margin+colW*0.58, y+5);
-      doc.text('Summa', margin+colW*0.75, y+5);
+      histTable = '<h3>' + histTitle + '</h3><table class="data"><tr><th>Дата</th><th>Марка</th><th>Тонны</th><th>Сумма</th></tr>';
+      histArr.forEach(deal => {
+        histTable += `<tr><td>${deal.date||''}</td><td>${deal.cement||''}</td><td>${deal.tons||0} тн</td><td>${fmt(deal.buy)} сум</td></tr>`;
+      });
     }
-    y += 7;
-    let even = false;
-    histArr.forEach(item => {
-      if (y > 270) { doc.addPage(); y = 20; }
-      if (even) { doc.setFillColor(249,250,251); doc.rect(margin, y, colW, 7, 'F'); }
-      doc.setTextColor(50,50,50); doc.setFontSize(9); doc.setFont('helvetica','normal');
-      if (type === 'client') {
-        doc.text(item.date||'', margin+3, y+5);
-        doc.text(item.type||'', margin+colW*0.35, y+5);
-        doc.setTextColor(22,163,74); doc.setFont('helvetica','bold');
-        doc.text(fmt(item.amt)+' sum', margin+colW*0.72, y+5);
-        doc.setTextColor(50,50,50); doc.setFont('helvetica','normal');
-      } else {
-        doc.text(item.date||'', margin+3, y+5);
-        doc.text(item.cement||'', margin+colW*0.3, y+5);
-        doc.text((item.tons||0)+' tn', margin+colW*0.58, y+5);
-        doc.text(fmt(item.buy)+' sum', margin+colW*0.75, y+5);
-      }
-      doc.setDrawColor(229,231,235); doc.rect(margin, y, colW, 7, 'S');
-      y += 7; even = !even;
-    });
+    histTable += '</table>';
   }
 
-  // Подвал
-  doc.setTextColor(150,150,150); doc.setFontSize(8); doc.setFont('helvetica','normal');
-  doc.text('Sformirovano avtomaticheski · realizatsiya_2026 · ' + today,
-    pageW/2, doc.internal.pageSize.getHeight()-10, {align:'center'});
-
-  doc.save('Otchet_' + name.replace(/\s/g,'_') + '_' + today.replace(/\./g,'-') + '.pdf');
-}
-
-function downloadClientReport() {
-  generatePDF('client');
-}
-
-async function loadSupplierReport() {
-  const name = document.getElementById('r_supplier').value;
-  if(!name) return;
-  const el = document.getElementById('reportSupplierResult');
-  el.innerHTML = '<div style="color:var(--muted);text-align:center;padding:20px">Загружаем...</div>';
-  try {
-    const r = await fetch(API + '?type=supplier_report&name=' + encodeURIComponent(name));
-    const d = await r.json();
-    if(!d.ok) { el.innerHTML = '<div style="color:var(--red);text-align:center;padding:12px">Ошибка: '+(d.error||'')+'</div>'; return; }
-    lastSupplierData = { name, ...d };
-    el.innerHTML = renderSupplierReport(name, d) + `<button class="btn-download" onclick="downloadSupplierReport()">⬇️ Скачать отчёт (PDF)</button>`;
-  } catch(e) { el.innerHTML = '<div style="color:var(--red);text-align:center;padding:12px">Нет соединения</div>'; }
-}
-
-function renderSupplierReport(name, d) {
-  const fmt = v => Math.round(v).toLocaleString('ru-RU');
-  const debtColor = d.debt > 0 ? 'red' : 'green';
-
-  let cementRows = '';
-  if (d.bycement && Object.keys(d.bycement).length) {
-    cementRows = '<div class="report-section">По марке цемента</div><div class="report-card">';
-    for (const [cement, info] of Object.entries(d.bycement)) {
-      cementRows += `<div class="report-row"><span class="report-key">${cement}</span><span class="report-val">${info.tons.toLocaleString('ru-RU')} тн · ${fmt(info.buy)} сум</span></div>`;
-    }
-    cementRows += '</div>';
+  const html = `<!DOCTYPE html>
+<html><head>
+<meta charset="UTF-8">
+<title>${title} — ${data.name}</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:Arial,sans-serif;color:#1a1a1a;background:#fff}
+  .page{max-width:700px;margin:0 auto;padding:32px}
+  .no-print{display:flex;gap:10px;justify-content:center;margin-bottom:24px}
+  .btn-save{background:${accentColor};color:#fff;border:none;border-radius:8px;padding:13px 32px;font-size:15px;font-weight:700;cursor:pointer;font-family:Arial}
+  .btn-close{background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:13px 20px;font-size:15px;cursor:pointer;font-family:Arial}
+  .header{border-bottom:3px solid ${accentColor};padding-bottom:14px;margin-bottom:22px}
+  .header h1{font-size:22px;color:${accentColor};margin-bottom:3px}
+  .header p{color:#6b7280;font-size:12px}
+  table.summary{width:100%;border-collapse:collapse;margin-bottom:20px;background:#f9fafb}
+  table.summary td{padding:10px 14px;border-bottom:1px solid #e5e7eb;font-size:14px}
+  table.summary td:first-child{color:#6b7280;width:52%}
+  table.summary td:last-child{text-align:right;font-weight:600}
+  table.summary tr:last-child td{border-bottom:none}
+  h3{font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:#6b7280;margin:20px 0 8px;font-family:Arial}
+  table.data{width:100%;border-collapse:collapse;font-size:13px}
+  table.data th{background:${accentColor};color:#fff;padding:8px 12px;text-align:left;font-weight:600}
+  table.data td{padding:8px 12px;border-bottom:1px solid #f0f0f0}
+  table.data tr:nth-child(even) td{background:#f9fafb}
+  .footer{margin-top:36px;padding-top:14px;border-top:1px solid #e5e7eb;text-align:center;color:#9ca3af;font-size:11px}
+  @media print{
+    .no-print{display:none!important}
+    body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
   }
+</style>
+</head><body>
+<div class="page">
+  <div class="no-print">
+    <button class="btn-save" onclick="window.print()">🖨️ Сохранить как PDF</button>
+    <button class="btn-close" onclick="window.close()">✕ Закрыть</button>
+  </div>
+  <div class="header">
+    <h1>${title}</h1>
+    <p>Дата формирования: ${today} &nbsp;·&nbsp; Цемент Учёт</p>
+  </div>
+  <table class="summary">${summaryRows}</table>
+  ${cementTable}
+  ${histTable}
+  <div class="footer">Сформировано автоматически · реализация_2026 · ${today}</div>
+</div>
+</body></html>`;
 
-  let dealRows = '';
-  if (d.lastDeals && d.lastDeals.length) {
-    dealRows = '<div class="report-section">История закупок</div><div class="report-card">';
-    d.lastDeals.forEach(deal => {
-      dealRows += `<div class="report-row"><span class="report-key">${deal.date} · ${deal.cement}</span><span class="report-val">${deal.tons} тн · ${fmt(deal.buy)} сум</span></div>`;
-    });
-    dealRows += '</div>';
-  }
-
-  return `
-    <div class="report-section">Общие данные</div>
-    <div class="report-card">
-      <div class="report-row"><span class="report-key">Поставщик</span><span class="report-val blue">${name}</span></div>
-      <div class="report-row"><span class="report-key">Сделок</span><span class="report-val blue">${d.deals}</span></div>
-      <div class="report-row"><span class="report-key">Тонн закуплено</span><span class="report-val">${d.totalTons.toLocaleString('ru-RU')} тн</span></div>
-      <div class="report-row"><span class="report-key">Сумма закупки</span><span class="report-val">${fmt(d.totalBuy)} сум</span></div>
-      <div class="report-row"><span class="report-key">Уже оплачено</span><span class="report-val green">${fmt(d.totalPaid)} сум</span></div>
-      <div class="report-row"><span class="report-key">Долг поставщику</span><span class="report-val ${debtColor}">${fmt(d.debt)} сум</span></div>
-    </div>
-    ${cementRows}
-    ${dealRows}`;
+  const win = window.open('', '_blank');
+  win.document.write(html);
+  win.document.close();
 }
 
-function downloadSupplierReport() {
-  generatePDF('supplier');
-}
+function downloadClientReport() { openReportPDF('client'); }
+function downloadSupplierReport() { openReportPDF('supplier'); }
 
 function calcProfit() {
   const t=parseFloat(document.getElementById('s_tons').value)||0;
