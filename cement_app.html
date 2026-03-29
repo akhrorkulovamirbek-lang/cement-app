@@ -510,7 +510,8 @@ async function loadClientReport() {
         <div class="report-row"><span class="report-key">Оплачено</span><span class="report-val green">${fmt(d.totalPaid)} сум</span></div>
         <div class="report-row"><span class="report-key">Текущий долг</span><span class="report-val ${debtColor}">${fmt(d.debt)} сум</span></div>
       </div>
-      ${cementHTML}${payHTML}`;
+      ${cementHTML}${payHTML}
+      <button onclick="downloadReport('client')" style="margin-top:12px;width:100%;padding:14px;background:var(--blue);color:#000;font-family:var(--font);font-size:15px;font-weight:600;border:none;border-radius:10px;cursor:pointer">🖨️ Скачать отчёт</button>`;
   } catch(e) { el.innerHTML = '<div style="color:var(--red);text-align:center;padding:12px">Нет соединения</div>'; }
 }
 
@@ -556,7 +557,8 @@ async function loadSupplierReport() {
         <div class="report-row"><span class="report-key">Уже оплачено</span><span class="report-val green">${fmt(d.totalPaid)} сум</span></div>
         <div class="report-row"><span class="report-key">Долг поставщику</span><span class="report-val ${debtColor}">${fmt(d.debt)} сум</span></div>
       </div>
-      ${cementHTML}${dealsHTML}`;
+      ${cementHTML}${dealsHTML}
+      <button onclick="downloadReport('supplier')" style="margin-top:12px;width:100%;padding:14px;background:var(--blue);color:#000;font-family:var(--font);font-size:15px;font-weight:600;border:none;border-radius:10px;cursor:pointer">🖨️ Скачать отчёт</button>`;
   } catch(e) { el.innerHTML = '<div style="color:var(--red);text-align:center;padding:12px">Нет соединения</div>'; }
 }
 
@@ -702,6 +704,85 @@ function switchTab(type, el) {
     else { const p=chartProfit.data.datasets[0].data; chartProfit.data.datasets[0].backgroundColor=p.map(v=>v>=0?'#22c55e44':'#ef444444'); chartProfit.data.datasets[0].borderColor=p.map(v=>v>=0?'#22c55e':'#ef4444'); }
     chartProfit.update();
   }
+}
+
+// ── СКАЧАТЬ ОТЧЁТ ────────────────────────────────────────────
+function downloadReport(type) {
+  const data = type === 'client' ? lastClientData : lastSupplierData;
+  if (!data) return;
+  const fmt = v => Math.round(v).toLocaleString('ru-RU');
+  const today = new Date().toLocaleDateString('ru-RU');
+  const isClient = type === 'client';
+  const accent = isClient ? '#16a34a' : '#2563eb';
+  const title = isClient ? 'Отчёт по клиенту' : 'Отчёт по поставщику';
+  const debtColor = data.debt > 0 ? '#ef4444' : '#16a34a';
+
+  let summaryRows = isClient ? `
+    <tr><td>Клиент</td><td><b>${data.name}</b></td></tr>
+    <tr><td>Сделок</td><td>${data.deals}</td></tr>
+    <tr><td>Тонн куплено</td><td>${data.totalTons.toLocaleString('ru-RU')} тн</td></tr>
+    <tr><td>Продано на сумму</td><td>${fmt(data.totalSell)} сум</td></tr>
+    <tr><td>Оплачено</td><td style="color:#16a34a;font-weight:700">${fmt(data.totalPaid)} сум</td></tr>
+    <tr><td>Текущий долг</td><td style="color:${debtColor};font-weight:700;font-size:16px">${fmt(data.debt)} сум</td></tr>` : `
+    <tr><td>Поставщик</td><td><b>${data.name}</b></td></tr>
+    <tr><td>Сделок</td><td>${data.deals}</td></tr>
+    <tr><td>Тонн закуплено</td><td>${data.totalTons.toLocaleString('ru-RU')} тн</td></tr>
+    <tr><td>Сумма закупки</td><td>${fmt(data.totalBuy)} сум</td></tr>
+    <tr><td>Уже оплачено</td><td style="color:#16a34a;font-weight:700">${fmt(data.totalPaid)} сум</td></tr>
+    <tr><td>Долг поставщику</td><td style="color:${debtColor};font-weight:700;font-size:16px">${fmt(data.debt)} сум</td></tr>`;
+
+  let cementTable = '';
+  if (data.bycement && Object.keys(data.bycement).length) {
+    cementTable = '<h3>По марке цемента</h3><table><tr><th>Марка</th><th>Тонны</th><th>Сумма</th></tr>';
+    for (const [cement, info] of Object.entries(data.bycement)) {
+      const sum = isClient ? info.sell : info.buy;
+      cementTable += `<tr><td>${cement}</td><td>${info.tons.toLocaleString('ru-RU')} тн</td><td>${fmt(sum)} сум</td></tr>`;
+    }
+    cementTable += '</table>';
+  }
+
+  const histArr = isClient ? data.lastPayments : data.lastDeals;
+  const histTitle = isClient ? 'История оплат' : 'История закупок';
+  let histTable = '';
+  if (histArr && histArr.length) {
+    histTable = `<h3>${histTitle}</h3><table>`;
+    if (isClient) {
+      histTable += '<tr><th>Дата</th><th>Тип оплаты</th><th>Сумма</th></tr>';
+      histArr.forEach(p => { histTable += `<tr><td>${p.date||''}</td><td>${p.type||''}</td><td style="color:#16a34a;font-weight:600">${fmt(p.amt)} сум</td></tr>`; });
+    } else {
+      histTable += '<tr><th>Дата</th><th>Марка</th><th>Тонны</th><th>Сумма</th></tr>';
+      histArr.forEach(d => { histTable += `<tr><td>${d.date||''}</td><td>${d.cement||''}</td><td>${d.tons||0} тн</td><td>${fmt(d.buy)} сум</td></tr>`; });
+    }
+    histTable += '</table>';
+  }
+
+  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${title}</title>
+  <style>
+    body{font-family:Arial,sans-serif;padding:32px;color:#1a1a1a;max-width:700px;margin:0 auto}
+    .no-print{text-align:center;margin-bottom:24px}
+    .btn{background:${accent};color:#fff;border:none;border-radius:8px;padding:12px 32px;font-size:15px;font-weight:700;cursor:pointer}
+    h1{color:${accent};font-size:22px;border-bottom:3px solid ${accent};padding-bottom:12px;margin-bottom:20px}
+    p{color:#666;font-size:12px;margin-top:4px}
+    table{width:100%;border-collapse:collapse;margin-bottom:20px;font-size:14px}
+    th{background:${accent};color:#fff;padding:8px 12px;text-align:left}
+    td{padding:9px 12px;border-bottom:1px solid #e5e7eb}
+    td:first-child{color:#6b7280;width:50%}
+    tr:nth-child(even) td{background:#f9fafb}
+    h3{font-size:12px;text-transform:uppercase;color:#6b7280;letter-spacing:.5px;margin:20px 0 8px}
+    .footer{margin-top:32px;text-align:center;color:#9ca3af;font-size:11px;border-top:1px solid #e5e7eb;padding-top:16px}
+    @media print{.no-print{display:none}body{padding:16px;-webkit-print-color-adjust:exact;print-color-adjust:exact}}
+  </style></head><body>
+  <div class="no-print"><button class="btn" onclick="window.print()">🖨️ Сохранить как PDF</button></div>
+  <h1>${title}</h1>
+  <p>Дата формирования: ${today} · Цемент Учёт</p>
+  <table>${summaryRows}</table>
+  ${cementTable}${histTable}
+  <div class="footer">Сформировано автоматически · реализация_2026 · ${today}</div>
+  </body></html>`;
+
+  const win = window.open('', '_blank');
+  if (win) { win.document.write(html); win.document.close(); }
+  else { showToast('Разрешите всплывающие окна в браузере', 'err'); }
 }
 
 init();
