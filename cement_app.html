@@ -45,22 +45,11 @@ select:focus,input:focus{border-color:var(--blue)}
 input[type=date]{color-scheme:dark}
 select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%237070a0' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 16px center;padding-right:40px}
 .add-btn{width:44px;height:48px;flex-shrink:0;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--green);font-size:22px;display:flex;align-items:center;justify-content:center;cursor:pointer}
-/* Searchable select */
-.sel-wrap{position:relative;width:100%}
-.sel-search{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:10px 10px 0 0;color:var(--text);font-family:var(--font);font-size:15px;padding:12px 16px;outline:none;border-bottom:1px solid var(--border);display:none}
-.sel-search.on{display:block}
-.sel-search:focus{border-color:var(--blue)}
-.sel-dropdown{position:absolute;left:0;right:0;top:100%;background:var(--surface);border:1px solid var(--blue);border-top:none;border-radius:0 0 10px 10px;max-height:220px;overflow-y:auto;z-index:150;display:none;box-shadow:0 8px 24px rgba(0,0,0,.4)}
-.sel-dropdown.on{display:block}
-.sel-option{padding:12px 16px;font-size:15px;cursor:pointer;border-bottom:1px solid var(--border);transition:background .1s}
-.sel-option:last-child{border-bottom:none}
-.sel-option:hover,.sel-option.focused{background:var(--surface2)}
-.sel-option.selected{color:var(--green);font-weight:600}
-.sel-val{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:var(--font);font-size:16px;padding:14px 40px 14px 16px;outline:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:border-color .15s;position:relative}
-.sel-val.on{border-color:var(--blue);border-radius:10px 10px 0 0}
-.sel-val .sel-placeholder{color:var(--muted)}
-.sel-val .sel-arrow{color:var(--muted);font-size:12px;position:absolute;right:16px}
-.sel-empty{padding:12px 16px;color:var(--muted);font-size:14px;text-align:center}
+/* Search box above select */
+.search-box{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px 10px 0 0;border-bottom:none;color:var(--text);font-family:var(--font);font-size:14px;padding:10px 14px;outline:none;display:none}
+.search-box.on{display:block}
+.search-box:focus{border-color:var(--blue)}
+select.has-search{border-radius:0 0 10px 10px}
 .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .btn{background:var(--green);color:#000;font-family:var(--font);font-size:16px;font-weight:600;border:none;border-radius:var(--radius);padding:16px;width:100%;cursor:pointer;transition:opacity .15s;margin-top:4px}
 .btn:disabled{opacity:.4;cursor:not-allowed}
@@ -74,21 +63,15 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .modal-overlay.on{display:flex}
 .modal{background:var(--surface);border-radius:20px 20px 0 0;padding:24px 20px 40px;width:100%;display:flex;flex-direction:column;gap:12px}
 .modal-title{font-size:17px;font-weight:600;margin-bottom:4px}
-/* Report cards */
 .report-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;display:flex;flex-direction:column;gap:0}
 .report-row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)}
 .report-row:last-child{border-bottom:none}
 .report-key{font-size:14px;color:var(--muted)}.report-val{font-size:15px;font-weight:600}
 .report-val.green{color:var(--green)}.report-val.red{color:var(--red)}.report-val.blue{color:var(--blue)}.report-val.amber{color:var(--amber)}
 .report-section{font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin:14px 0 6px}
-/* Download button */
-.btn-download{background:var(--blue);color:#000;font-family:var(--font);font-size:14px;font-weight:600;border:none;border-radius:10px;padding:12px 16px;width:100%;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px}
-.btn-download:active{opacity:.85}
-/* Loader */
 .loader{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:100;transition:opacity .3s}
 .loader.hidden{opacity:0;pointer-events:none}
 .spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite}
-/* Dashboard */
 .dash{padding:16px;display:flex;flex-direction:column;gap:16px}
 .kpi-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px}
@@ -101,13 +84,13 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 .chart-sub{font-size:12px;color:var(--muted);margin-bottom:14px}
 .chart-wrap{position:relative;height:180px}
 .chart-tabs{display:flex;gap:8px;margin-bottom:14px}
-.chart-tab{font-size:12px;padding:6px 12px;border-radius:100px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:var(--font);transition:all .15s}
+.chart-tab{font-size:12px;padding:6px 12px;border-radius:100px;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:var(--font)}
 .chart-tab.on{background:var(--blue-dim);border-color:var(--blue);color:var(--blue)}
 .debt-list{display:flex;flex-direction:column;gap:8px}
 .debt-item{display:flex;align-items:center;gap:10px}
 .debt-name{font-size:13px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .debt-bar-wrap{width:80px;height:6px;background:var(--border);border-radius:3px;flex-shrink:0}
-.debt-bar{height:6px;border-radius:3px;background:var(--red);transition:width .6s}
+.debt-bar{height:6px;border-radius:3px;background:var(--red)}
 .debt-amt{font-size:12px;color:var(--red);font-weight:600;white-space:nowrap;min-width:65px;text-align:right}
 .dash-loading{text-align:center;padding:40px;color:var(--muted);font-size:14px}
 .dash-spinner{width:28px;height:28px;border:2px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
@@ -118,7 +101,6 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 <div class="loader" id="loader"><div class="spinner"></div></div>
 <div class="toast" id="toast"></div>
 
-<!-- ADD MODAL -->
 <div class="modal-overlay" id="addModal" onclick="closeModal(event)">
   <div class="modal">
     <div class="modal-title" id="modalTitle">Добавить</div>
@@ -143,27 +125,27 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
     <div class="refresh" id="refreshBtn" onclick="loadBalance()">↻</div>
   </div>
   <div class="menu">
-    <div class="card" onclick="showScreen('savdoScreen','📦 Продажа','Savdo')">
+    <div class="card" onclick="go('savdoScreen','📦 Продажа','Savdo')">
       <div class="icon g">📦</div>
       <div class="card-text"><div class="card-label">Продажа</div><div class="card-desc">Записать реализацию цемента</div></div>
       <div class="arrow">›</div>
     </div>
-    <div class="card" onclick="showScreen('kirimScreen','💚 Приход','Kirim')">
+    <div class="card" onclick="go('kirimScreen','💚 Приход','Kirim')">
       <div class="icon b">💚</div>
       <div class="card-text"><div class="card-label">Приход денег</div><div class="card-desc">Оплата от клиента</div></div>
       <div class="arrow">›</div>
     </div>
-    <div class="card" onclick="showScreen('chiqimScreen','🔴 Расход','Chiqim')">
+    <div class="card" onclick="go('chiqimScreen','🔴 Расход','Chiqim')">
       <div class="icon r">🔴</div>
       <div class="card-text"><div class="card-label">Расход денег</div><div class="card-desc">Оплата поставщику / транспорт</div></div>
       <div class="arrow">›</div>
     </div>
-    <div class="card" onclick="showScreen('reportClientScreen','📊 Отчёт по клиенту','Выберите клиента')">
+    <div class="card" onclick="go('reportClientScreen','📊 Отчёт по клиенту','Выберите клиента')">
       <div class="icon a">📊</div>
       <div class="card-text"><div class="card-label">Отчёт по клиенту</div><div class="card-desc">Марки, оплаты, долг</div></div>
       <div class="arrow">›</div>
     </div>
-    <div class="card" onclick="showScreen('reportSupplierScreen','🏭 Отчёт по поставщику','Выберите поставщика')">
+    <div class="card" onclick="go('reportSupplierScreen','🏭 Отчёт по поставщику','Выберите поставщика')">
       <div class="icon p">🏭</div>
       <div class="card-text"><div class="card-label">Отчёт по поставщику</div><div class="card-desc">Тонны, закупки, задолженность</div></div>
       <div class="arrow">›</div>
@@ -173,7 +155,7 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
       <div class="card-text"><div class="card-label">Аналитика</div><div class="card-desc">Графики, тренды, топ должников</div></div>
       <div class="arrow">›</div>
     </div>
-    <div class="card" onclick="showScreen('addScreen','➕ Добавить','Клиент или поставщик')">
+    <div class="card" onclick="go('addScreen','➕ Добавить','Клиент или поставщик')">
       <div class="icon p">➕</div>
       <div class="card-text"><div class="card-label">Добавить клиента / поставщика</div><div class="card-desc">В таблицу Google Sheets</div></div>
       <div class="arrow">›</div>
@@ -185,10 +167,22 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 <div class="screen" id="savdoScreen">
   <div class="form">
     <div><div class="flabel">Клиент</div>
-      <div class="input-row"><div class="sel-wrap" id="sw_s_client"></div><div class="add-btn" onclick="openModal('client')">+</div></div>
+      <div class="input-row">
+        <div style="flex:1">
+          <input class="search-box" id="search_s_client" placeholder="🔍 Поиск клиента..." oninput="filterSelect('s_client',this.value)">
+          <select id="s_client" onchange="syncSearch('s_client')" onfocus="showSearch('s_client')"><option value="">— выберите —</option></select>
+        </div>
+        <div class="add-btn" onclick="openModal('client')">+</div>
+      </div>
     </div>
     <div><div class="flabel">Поставщик</div>
-      <div class="input-row"><div class="sel-wrap" id="sw_s_supplier"></div><div class="add-btn" onclick="openModal('supplier')">+</div></div>
+      <div class="input-row">
+        <div style="flex:1">
+          <input class="search-box" id="search_s_supplier" placeholder="🔍 Поиск поставщика..." oninput="filterSelect('s_supplier',this.value)">
+          <select id="s_supplier" onchange="syncSearch('s_supplier')" onfocus="showSearch('s_supplier')"><option value="">— выберите —</option></select>
+        </div>
+        <div class="add-btn" onclick="openModal('supplier')">+</div>
+      </div>
     </div>
     <div><div class="flabel">Марка цемента</div><select id="s_cement"><option value="">— выберите —</option></select></div>
     <div><div class="flabel">Номер авто</div><input type="text" id="s_auto" placeholder="30 678 YBA"></div>
@@ -208,7 +202,13 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 <div class="screen" id="kirimScreen">
   <div class="form">
     <div><div class="flabel">Клиент</div>
-      <div class="input-row"><div class="sel-wrap" id="sw_k_client"></div><div class="add-btn" onclick="openModal('client')">+</div></div>
+      <div class="input-row">
+        <div style="flex:1">
+          <input class="search-box" id="search_k_client" placeholder="🔍 Поиск клиента..." oninput="filterSelect('k_client',this.value)">
+          <select id="k_client" onfocus="showSearch('k_client')"><option value="">— выберите —</option></select>
+        </div>
+        <div class="add-btn" onclick="openModal('client')">+</div>
+      </div>
     </div>
     <div><div class="flabel">Тип оплаты</div>
       <select id="k_payment"><option value="">— выберите —</option><option value="накд">Наличные (накд)</option><option value="перечисление">Банк (перечисление)</option></select>
@@ -224,7 +224,13 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
   <div class="form">
     <div>
       <div class="flabel" id="ch_payee_label">Поставщик / получатель</div>
-      <div class="input-row"><div class="sel-wrap" id="sw_ch_payee"></div><div class="add-btn" id="ch_add_btn" onclick="openModal('supplier')">+</div></div>
+      <div class="input-row">
+        <div style="flex:1">
+          <input class="search-box" id="search_ch_payee" placeholder="🔍 Поиск..." oninput="filterSelect('ch_payee',this.value)">
+          <select id="ch_payee" onfocus="showSearch('ch_payee')"><option value="">— выберите —</option></select>
+        </div>
+        <div class="add-btn" id="ch_add_btn" onclick="openModal('supplier')">+</div>
+      </div>
     </div>
     <div><div class="flabel">Категория</div>
       <select id="ch_type" onchange="onChiqimTypeChange()">
@@ -246,7 +252,10 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 <!-- REPORT CLIENT -->
 <div class="screen" id="reportClientScreen">
   <div class="form">
-    <div><div class="flabel">Клиент</div><div class="sel-wrap" id="sw_r_client"></div></div>
+    <div><div class="flabel">Клиент</div>
+      <input class="search-box on" id="search_r_client" placeholder="🔍 Поиск клиента..." oninput="filterSelect('r_client',this.value)" style="border-radius:10px 10px 0 0;display:block">
+      <select id="r_client" class="has-search" onchange="loadClientReport()"><option value="">— выберите —</option></select>
+    </div>
     <div id="reportClientResult"></div>
   </div>
 </div>
@@ -254,7 +263,10 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 <!-- REPORT SUPPLIER -->
 <div class="screen" id="reportSupplierScreen">
   <div class="form">
-    <div><div class="flabel">Поставщик</div><div class="sel-wrap" id="sw_r_supplier"></div></div>
+    <div><div class="flabel">Поставщик</div>
+      <input class="search-box on" id="search_r_supplier" placeholder="🔍 Поиск поставщика..." oninput="filterSelect('r_supplier',this.value)" style="border-radius:10px 10px 0 0;display:block">
+      <select id="r_supplier" class="has-search" onchange="loadSupplierReport()"><option value="">— выберите —</option></select>
+    </div>
     <div id="reportSupplierResult"></div>
   </div>
 </div>
@@ -283,133 +295,22 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 </div>
 
 <script>
-// ================================================================
-//  SEARCHABLE SELECT — компонент поиска с выпадающим списком
-// ================================================================
-class SearchableSelect {
-  constructor(wrapperId, { placeholder='— выберите —', onChange=null } = {}) {
-    this.wrapper = document.getElementById(wrapperId);
-    this.placeholder = placeholder;
-    this.onChange = onChange;
-    this._value = '';
-    this._items = [];
-    this._build();
-  }
-
-  _build() {
-    this.wrapper.innerHTML = `
-      <div class="sel-val" id="${this.wrapper.id}_val" onclick="this.parentElement._sel.toggle()">
-        <span class="sel-placeholder">${this.placeholder}</span>
-        <span class="sel-arrow">▼</span>
-      </div>
-      <input class="sel-search" id="${this.wrapper.id}_search" placeholder="🔍 Поиск..." oninput="this.parentElement._sel._filter(this.value)">
-      <div class="sel-dropdown" id="${this.wrapper.id}_drop"></div>`;
-    this.wrapper._sel = this;
-    this.valEl    = this.wrapper.querySelector('.sel-val');
-    this.searchEl = this.wrapper.querySelector('.sel-search');
-    this.dropEl   = this.wrapper.querySelector('.sel-dropdown');
-    // Закрываем при клике снаружи
-    document.addEventListener('click', e => { if (!this.wrapper.contains(e.target)) this.close(); });
-  }
-
-  setItems(items) {
-    this._items = items;
-    this._render(items);
-  }
-
-  _render(items) {
-    if (!items.length) {
-      this.dropEl.innerHTML = '<div class="sel-empty">Ничего не найдено</div>';
-      return;
-    }
-    this.dropEl.innerHTML = items.map(item =>
-      `<div class="sel-option${item === this._value ? ' selected' : ''}" onclick="this.closest('.sel-wrap')._sel._select('${item.replace(/'/g, "\'")}')">${item}</div>`
-    ).join('');
-  }
-
-  _filter(query) {
-    const q = query.toLowerCase();
-    const filtered = q ? this._items.filter(i => i.toLowerCase().includes(q)) : this._items;
-    this._render(filtered);
-  }
-
-  _select(value) {
-    this._value = value;
-    this.valEl.innerHTML = `<span>${value}</span><span class="sel-arrow">▼</span>`;
-    this.valEl.classList.remove('sel-placeholder');
-    this.close();
-    if (this.onChange) this.onChange(value);
-  }
-
-  toggle() {
-    if (this.dropEl.classList.contains('on')) this.close();
-    else this.open();
-  }
-
-  open() {
-    // Закрываем все остальные
-    document.querySelectorAll('.sel-dropdown.on').forEach(d => {
-      if (d !== this.dropEl) {
-        d.classList.remove('on');
-        d.previousElementSibling.classList.remove('on');
-        d.previousElementSibling.previousElementSibling.classList.remove('on');
-      }
-    });
-    this.valEl.classList.add('on');
-    this.searchEl.classList.add('on');
-    this.dropEl.classList.add('on');
-    this.searchEl.value = '';
-    this._render(this._items);
-    setTimeout(() => this.searchEl.focus(), 50);
-  }
-
-  close() {
-    this.valEl.classList.remove('on');
-    this.searchEl.classList.remove('on');
-    this.dropEl.classList.remove('on');
-  }
-
-  get value() { return this._value; }
-
-  set value(v) {
-    this._value = v;
-    if (v) {
-      this.valEl.innerHTML = `<span>${v}</span><span class="sel-arrow">▼</span>`;
-    } else {
-      this.valEl.innerHTML = `<span class="sel-placeholder">${this.placeholder}</span><span class="sel-arrow">▼</span>`;
-    }
-  }
-
-  reset() { this.value = ''; }
-}
-
-// Реестр всех компонентов
-const SELECTS = {};
-
-function initSelects() {
-  SELECTS.s_client   = new SearchableSelect('sw_s_client',   { onChange: () => {} });
-  SELECTS.s_supplier = new SearchableSelect('sw_s_supplier',  { onChange: () => {} });
-  SELECTS.k_client   = new SearchableSelect('sw_k_client',   { onChange: () => {} });
-  SELECTS.ch_payee   = new SearchableSelect('sw_ch_payee',   { onChange: () => {} });
-  SELECTS.r_client   = new SearchableSelect('sw_r_client',   { onChange: () => loadClientReport() });
-  SELECTS.r_supplier = new SearchableSelect('sw_r_supplier',  { onChange: () => loadSupplierReport() });
-}
-
 const API = 'https://script.google.com/macros/s/AKfycbyecpjKA5w7vA9G8exvZ9BIXtxlUkFwtoW7x9bIso8vMwhBcfm7hZXi9DI8djE8y1KQMg/exec';
 let config = { clients:[], suppliers:[], cement:[], payment:[] };
 let modalType = '';
 let chartProfit = null, chartPayment = null, analyticsLoaded = false;
+let lastClientData = null, lastSupplierData = null;
 
-// ✅ ИСПРАВЛЕНО: today() — берём локальное время устройства напрямую
+// ── ДАТА ─────────────────────────────────────────────────────
 function today() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
-
 function setDates() {
   ['s_date','k_date','ch_date'].forEach(id => document.getElementById(id).value = today());
 }
 
+// ── HARDCODED СПИСОК ─────────────────────────────────────────
 const HARDCODED = {
   clients: ['Элдор Азамат','Мухриддин','Умид','Аслиддин ака','Феруз','Асад заправшик','Субхон','Асил мамажонов','Фарход','Зафар Азамат','Ботирхужа','Шухрат','Асилбек','Алишер Умид','Хасан Абу сахий','Исомиддин','Абдурахим ака сам','Алибек Булунгур','Ислом шахрисабз','Бекзод пайарик','Одил усмат','Заршед','Дониер Шофер','Отабек ака карши','Ахрор бекобод','Жавлон ака Зенаткор','Жавлон ака Азамат','Хожиакбар','Шахбоз самарканд','Акмал эшон','Абдуллох комфорт','Сулаймон булунгур','Шерзод гагарин','Ургут 1626','Хает','Вахоб ака Учтепа','Жавлон ака К Б','Шерзод ака дустлик','Ахад ака Иштихон','Ходикул ака Ургут','Илёс ака Богизагон','Зохид ака Иштихон','Шухрат ака Кипчок','Акмалжон','Дилшод Умакай','Жахон ака Куевбоши','Мансур ака Жомбой','Максуд ака Ургут','Рустам ака Брусчатка','Жавлон ака','Комил','Шерали самосвал','Ахмад кишича','Сухроб Ибн Сино'],
   suppliers: ['сезам','Абу сахий','комфорт','Хуаксин (Насимий)','Шавкат Абусахий','Нурали сезам','Бурхон ака Карши','Абу сахий 2','Алам ака','Хуаксин (Дилшод)','Хуаксин Бизнес М','Хуаксин 3'],
@@ -417,17 +318,13 @@ const HARDCODED = {
   payment: ['накд','перечисление']
 };
 
+// ── ИНИЦИАЛИЗАЦИЯ ─────────────────────────────────────────────
 async function init() {
-  initSelects();
   config = { ...HARDCODED };
   fillAll();
   setDates();
   document.getElementById('loader').classList.add('hidden');
-
-  // ✅ ИСПРАВЛЕНО: баланс грузится независимо — не зависит от config
   loadBalance();
-
-  // Обновляем config в фоне
   try {
     const r = await fetch(API + '?type=config');
     const fresh = await r.json();
@@ -435,62 +332,82 @@ async function init() {
   } catch(e) {}
 }
 
+// ── ЗАПОЛНЕНИЕ СЕЛЕКТОВ ───────────────────────────────────────
 function fillAll() {
-  // Searchable selects
-  if (SELECTS.s_client)   SELECTS.s_client.setItems(config.clients);
-  if (SELECTS.s_supplier) SELECTS.s_supplier.setItems(config.suppliers);
-  if (SELECTS.k_client)   SELECTS.k_client.setItems(config.clients);
-  if (SELECTS.ch_payee)   SELECTS.ch_payee.setItems(config.suppliers);
-  if (SELECTS.r_client)   SELECTS.r_client.setItems(config.clients);
-  if (SELECTS.r_supplier) SELECTS.r_supplier.setItems(config.suppliers);
-  // Обычные select (марка цемента, тип оплаты)
-  fillSelect('s_cement',  config.cement);
+  fillSelect('s_client',   config.clients);
+  fillSelect('s_supplier', config.suppliers);
+  fillSelect('s_cement',   config.cement);
+  fillSelect('k_client',   config.clients);
+  fillSelect('ch_payee',   config.suppliers);
+  fillSelect('r_client',   config.clients);
+  fillSelect('r_supplier', config.suppliers);
 }
 
 function fillSelect(id, items) {
   const sel = document.getElementById(id);
+  if (!sel) return;
   const cur = sel.value;
-  while(sel.options.length > 1) sel.remove(1);
-  items.forEach(item => { const o = document.createElement('option'); o.value = o.textContent = item; sel.appendChild(o); });
-  if(cur) sel.value = cur;
+  sel._allItems = items; // сохраняем для фильтра
+  while (sel.options.length > 1) sel.remove(1);
+  items.forEach(item => {
+    const o = document.createElement('option');
+    o.value = o.textContent = item;
+    sel.appendChild(o);
+  });
+  if (cur) sel.value = cur;
 }
 
+// ── ПОИСК В СЕЛЕКТЕ ───────────────────────────────────────────
+function showSearch(selId) {
+  const sb = document.getElementById('search_' + selId);
+  const sel = document.getElementById(selId);
+  if (!sb) return;
+  sb.classList.add('on');
+  sel.classList.add('has-search');
+  sb.focus();
+}
+
+function filterSelect(selId, query) {
+  const sel = document.getElementById(selId);
+  if (!sel || !sel._allItems) return;
+  const q = query.toLowerCase();
+  const filtered = q ? sel._allItems.filter(i => i.toLowerCase().includes(q)) : sel._allItems;
+  const cur = sel.value;
+  while (sel.options.length > 1) sel.remove(1);
+  filtered.forEach(item => {
+    const o = document.createElement('option');
+    o.value = o.textContent = item;
+    sel.appendChild(o);
+  });
+  if (cur) sel.value = cur;
+}
+
+function syncSearch(selId) {
+  const sb = document.getElementById('search_' + selId);
+  const sel = document.getElementById(selId);
+  if (sb && sel.value) sb.value = sel.value;
+}
+
+// ── БАЛАНС ────────────────────────────────────────────────────
 async function loadBalance() {
   const btn = document.getElementById('refreshBtn');
   btn.classList.add('spin');
   try {
     const r = await fetch(API + '?type=balance');
     const d = await r.json();
-    if(d.ok) document.getElementById('balAmt').textContent = Math.round(d.balance).toLocaleString('ru-RU') + ' сум';
+    if (d.ok) document.getElementById('balAmt').textContent = Math.round(d.balance).toLocaleString('ru-RU') + ' сум';
   } catch(e) {}
   setTimeout(() => btn.classList.remove('spin'), 600);
 }
 
-// ✅ ИСПРАВЛЕНО: список получателя меняется по категории расхода
-function onChiqimTypeChange() {
-  const type   = document.getElementById('ch_type').value;
-  const label  = document.getElementById('ch_payee_label');
-  const addBtn = document.getElementById('ch_add_btn');
-  if (SELECTS.ch_payee) SELECTS.ch_payee.reset();
-  if (type === 'возврат') {
-    label.textContent = 'Клиент (кому возврат)';
-    if (SELECTS.ch_payee) SELECTS.ch_payee.setItems(config.clients);
-    addBtn.onclick = () => openModal('client');
-  } else {
-    label.textContent = 'Поставщик / получатель';
-    if (SELECTS.ch_payee) SELECTS.ch_payee.setItems(config.suppliers);
-    addBtn.onclick = () => openModal('supplier');
-  }
-}
-
-function showScreen(id, title, sub) {
+// ── НАВИГАЦИЯ ─────────────────────────────────────────────────
+function go(id, title, sub) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
   document.getElementById(id).classList.add('on');
   document.getElementById('hTitle').textContent = title;
   document.getElementById('hSub').textContent = sub;
   document.getElementById('backBtn').classList.add('on');
 }
-
 function goHome() {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
   document.getElementById('homeScreen').classList.add('on');
@@ -499,6 +416,7 @@ function goHome() {
   document.getElementById('backBtn').classList.remove('on');
 }
 
+// ── МОДАЛ ДОБАВИТЬ ────────────────────────────────────────────
 function openModal(type) {
   modalType = type;
   document.getElementById('modalTitle').textContent = type === 'client' ? '👤 Новый клиент' : '🏭 Новый поставщик';
@@ -506,283 +424,143 @@ function openModal(type) {
   document.getElementById('addModal').classList.add('on');
   setTimeout(() => document.getElementById('modalInput').focus(), 300);
 }
-function closeModal(e) { if(e.target.id==='addModal') document.getElementById('addModal').classList.remove('on'); }
+function closeModal(e) { if (e.target.id === 'addModal') document.getElementById('addModal').classList.remove('on'); }
 
 async function submitAdd() {
   const name = document.getElementById('modalInput').value.trim();
-  if(!name) { showToast('Введите имя','err'); return; }
+  if (!name) { showToast('Введите имя', 'err'); return; }
   const btn = document.getElementById('modalBtn');
   btn.disabled = true; btn.textContent = 'Добавляем...';
   try {
     const type = modalType === 'client' ? 'add_client' : 'add_supplier';
     const r = await fetch(API + '?type=' + type + '&name=' + encodeURIComponent(name));
     const d = await r.json();
-    if(d.ok) {
-      if(modalType === 'client') config.clients.push(name);
+    if (d.ok) {
+      if (modalType === 'client') config.clients.push(name);
       else config.suppliers.push(name);
       fillAll();
       document.getElementById('addModal').classList.remove('on');
       showToast('✓ ' + name + ' добавлен!', 'ok');
     } else {
-      const msg = (d.error||'').includes('уже существует')
-        ? '⚠️ ' + name + ' уже есть в списке'
-        : 'Ошибка: ' + (d.error||'');
+      const msg = (d.error||'').includes('уже существует') ? '⚠️ ' + name + ' уже есть в списке' : 'Ошибка: ' + (d.error||'');
       showToast(msg, 'err');
     }
   } catch(e) { showToast('Нет соединения', 'err'); }
   btn.disabled = false; btn.textContent = 'Добавить';
 }
 
-let lastClientData = null;
-let lastSupplierData = null;
+// ── РАСХОД: переключение клиент/поставщик ────────────────────
+function onChiqimTypeChange() {
+  const type = document.getElementById('ch_type').value;
+  const label = document.getElementById('ch_payee_label');
+  const addBtn = document.getElementById('ch_add_btn');
+  document.getElementById('ch_payee').selectedIndex = 0;
+  const sb = document.getElementById('search_ch_payee');
+  if (sb) sb.value = '';
+  if (type === 'возврат') {
+    label.textContent = 'Клиент (кому возврат)';
+    fillSelect('ch_payee', config.clients);
+    addBtn.onclick = () => openModal('client');
+  } else {
+    label.textContent = 'Поставщик / получатель';
+    fillSelect('ch_payee', config.suppliers);
+    addBtn.onclick = () => openModal('supplier');
+  }
+}
 
+// ── ОТЧЁТ ПО КЛИЕНТУ ─────────────────────────────────────────
 async function loadClientReport() {
-  const name = SELECTS.r_client ? SELECTS.r_client.value : '';
-  if(!name) return;
+  const name = document.getElementById('r_client').value;
+  if (!name) return;
   const el = document.getElementById('reportClientResult');
   el.innerHTML = '<div style="color:var(--muted);text-align:center;padding:20px">Загружаем...</div>';
   try {
     const r = await fetch(API + '?type=client_report&name=' + encodeURIComponent(name));
     const d = await r.json();
-    if(!d.ok) { el.innerHTML = '<div style="color:var(--red);text-align:center;padding:12px">Ошибка: '+(d.error||'')+'</div>'; return; }
+    if (!d.ok) { el.innerHTML = `<div style="color:var(--red);text-align:center;padding:12px">Ошибка: ${d.error||''}</div>`; return; }
     lastClientData = { name, ...d };
-    el.innerHTML = renderClientReport(name, d) + `<button id="btnPdfClient" class="btn-download" onclick="downloadClientReport()">🖨️ Скачать PDF</button>`;
+    const fmt = v => Math.round(v).toLocaleString('ru-RU');
+    const debtColor = d.debt > 0 ? 'red' : d.debt < 0 ? 'green' : '';
+
+    let cementHTML = '';
+    if (d.bycement && Object.keys(d.bycement).length) {
+      cementHTML = '<div class="report-section">По марке цемента</div><div class="report-card">';
+      for (const [cement, info] of Object.entries(d.bycement)) {
+        cementHTML += `<div class="report-row"><span class="report-key">${cement}</span><span class="report-val">${info.tons.toLocaleString('ru-RU')} тн · ${fmt(info.sell)} сум</span></div>`;
+      }
+      cementHTML += '</div>';
+    }
+
+    let payHTML = '';
+    if (d.lastPayments && d.lastPayments.length) {
+      payHTML = '<div class="report-section">История оплат</div><div class="report-card">';
+      d.lastPayments.forEach(p => {
+        payHTML += `<div class="report-row"><span class="report-key">${p.date||''} · ${p.type||''}</span><span class="report-val green">${fmt(p.amt)} сум</span></div>`;
+      });
+      payHTML += '</div>';
+    }
+
+    el.innerHTML = `
+      <div class="report-section">Общие данные</div>
+      <div class="report-card">
+        <div class="report-row"><span class="report-key">Клиент</span><span class="report-val blue">${name}</span></div>
+        <div class="report-row"><span class="report-key">Сделок</span><span class="report-val">${d.deals}</span></div>
+        <div class="report-row"><span class="report-key">Тонн куплено</span><span class="report-val">${d.totalTons.toLocaleString('ru-RU')} тн</span></div>
+        <div class="report-row"><span class="report-key">Продано на сумму</span><span class="report-val">${fmt(d.totalSell)} сум</span></div>
+        <div class="report-row"><span class="report-key">Оплачено</span><span class="report-val green">${fmt(d.totalPaid)} сум</span></div>
+        <div class="report-row"><span class="report-key">Текущий долг</span><span class="report-val ${debtColor}">${fmt(d.debt)} сум</span></div>
+      </div>
+      ${cementHTML}${payHTML}`;
   } catch(e) { el.innerHTML = '<div style="color:var(--red);text-align:center;padding:12px">Нет соединения</div>'; }
 }
 
-function renderClientReport(name, d) {
-  const fmt = v => Math.round(v).toLocaleString('ru-RU');
-  const debtColor = d.debt > 0 ? 'red' : d.debt < 0 ? 'green' : '';
-
-  let cementRows = '';
-  if (d.bycement && Object.keys(d.bycement).length) {
-    cementRows = '<div class="report-section">По марке цемента</div><div class="report-card">';
-    for (const [cement, info] of Object.entries(d.bycement)) {
-      cementRows += `<div class="report-row"><span class="report-key">${cement}</span><span class="report-val">${info.tons.toLocaleString('ru-RU')} тн · ${fmt(info.sell)} сум</span></div>`;
-    }
-    cementRows += '</div>';
-  }
-
-  let payRows = '';
-  if (d.lastPayments && d.lastPayments.length) {
-    payRows = '<div class="report-section">История оплат</div><div class="report-card">';
-    d.lastPayments.forEach(p => {
-      payRows += `<div class="report-row"><span class="report-key">${p.date} · ${p.type}</span><span class="report-val green">${fmt(p.amt)} сум</span></div>`;
-    });
-    payRows += '</div>';
-  }
-
-  return `
-    <div class="report-section">Общие данные</div>
-    <div class="report-card">
-      <div class="report-row"><span class="report-key">Клиент</span><span class="report-val blue">${name}</span></div>
-      <div class="report-row"><span class="report-key">Сделок</span><span class="report-val blue">${d.deals}</span></div>
-      <div class="report-row"><span class="report-key">Тонн куплено</span><span class="report-val">${d.totalTons.toLocaleString('ru-RU')} тн</span></div>
-      <div class="report-row"><span class="report-key">Продано на сумму</span><span class="report-val">${fmt(d.totalSell)} сум</span></div>
-      <div class="report-row"><span class="report-key">Оплачено</span><span class="report-val green">${fmt(d.totalPaid)} сум</span></div>
-      <div class="report-row"><span class="report-key">Текущий долг</span><span class="report-val ${debtColor}">${fmt(d.debt)} сум</span></div>
-    </div>
-    ${cementRows}
-    ${payRows}`;
-}
-
+// ── ОТЧЁТ ПО ПОСТАВЩИКУ ───────────────────────────────────────
 async function loadSupplierReport() {
-  const name = SELECTS.r_supplier ? SELECTS.r_supplier.value : '';
-  if(!name) return;
+  const name = document.getElementById('r_supplier').value;
+  if (!name) return;
   const el = document.getElementById('reportSupplierResult');
   el.innerHTML = '<div style="color:var(--muted);text-align:center;padding:20px">Загружаем...</div>';
   try {
     const r = await fetch(API + '?type=supplier_report&name=' + encodeURIComponent(name));
     const d = await r.json();
-    if(!d.ok) { el.innerHTML = '<div style="color:var(--red);text-align:center;padding:12px">Ошибка: '+(d.error||'')+'</div>'; return; }
+    if (!d.ok) { el.innerHTML = `<div style="color:var(--red);text-align:center;padding:12px">Ошибка: ${d.error||''}</div>`; return; }
     lastSupplierData = { name, ...d };
-    el.innerHTML = renderSupplierReport(name, d) + `<button id="btnPdfSupplier" class="btn-download" onclick="downloadSupplierReport()">🖨️ Скачать PDF</button>`;
+    const fmt = v => Math.round(v).toLocaleString('ru-RU');
+    const debtColor = d.debt > 0 ? 'red' : 'green';
+
+    let cementHTML = '';
+    if (d.bycement && Object.keys(d.bycement).length) {
+      cementHTML = '<div class="report-section">По марке цемента</div><div class="report-card">';
+      for (const [cement, info] of Object.entries(d.bycement)) {
+        cementHTML += `<div class="report-row"><span class="report-key">${cement}</span><span class="report-val">${info.tons.toLocaleString('ru-RU')} тн · ${fmt(info.buy)} сум</span></div>`;
+      }
+      cementHTML += '</div>';
+    }
+
+    let dealsHTML = '';
+    if (d.lastDeals && d.lastDeals.length) {
+      dealsHTML = '<div class="report-section">История закупок</div><div class="report-card">';
+      d.lastDeals.forEach(deal => {
+        dealsHTML += `<div class="report-row"><span class="report-key">${deal.date||''} · ${deal.cement||''}</span><span class="report-val">${deal.tons} тн · ${fmt(deal.buy)} сум</span></div>`;
+      });
+      dealsHTML += '</div>';
+    }
+
+    el.innerHTML = `
+      <div class="report-section">Общие данные</div>
+      <div class="report-card">
+        <div class="report-row"><span class="report-key">Поставщик</span><span class="report-val blue">${name}</span></div>
+        <div class="report-row"><span class="report-key">Сделок</span><span class="report-val">${d.deals}</span></div>
+        <div class="report-row"><span class="report-key">Тонн закуплено</span><span class="report-val">${d.totalTons.toLocaleString('ru-RU')} тн</span></div>
+        <div class="report-row"><span class="report-key">Сумма закупки</span><span class="report-val">${fmt(d.totalBuy)} сум</span></div>
+        <div class="report-row"><span class="report-key">Уже оплачено</span><span class="report-val green">${fmt(d.totalPaid)} сум</span></div>
+        <div class="report-row"><span class="report-key">Долг поставщику</span><span class="report-val ${debtColor}">${fmt(d.debt)} сум</span></div>
+      </div>
+      ${cementHTML}${dealsHTML}`;
   } catch(e) { el.innerHTML = '<div style="color:var(--red);text-align:center;padding:12px">Нет соединения</div>'; }
 }
 
-function renderSupplierReport(name, d) {
-  const fmt = v => Math.round(v).toLocaleString('ru-RU');
-  const debtColor = d.debt > 0 ? 'red' : 'green';
-
-  let cementRows = '';
-  if (d.bycement && Object.keys(d.bycement).length) {
-    cementRows = '<div class="report-section">По марке цемента</div><div class="report-card">';
-    for (const [cement, info] of Object.entries(d.bycement)) {
-      cementRows += `<div class="report-row"><span class="report-key">${cement}</span><span class="report-val">${info.tons.toLocaleString('ru-RU')} тн · ${fmt(info.buy)} сум</span></div>`;
-    }
-    cementRows += '</div>';
-  }
-
-  let dealRows = '';
-  if (d.lastDeals && d.lastDeals.length) {
-    dealRows = '<div class="report-section">История закупок</div><div class="report-card">';
-    d.lastDeals.forEach(deal => {
-      dealRows += `<div class="report-row"><span class="report-key">${deal.date} · ${deal.cement}</span><span class="report-val">${deal.tons} тн · ${fmt(deal.buy)} сум</span></div>`;
-    });
-    dealRows += '</div>';
-  }
-
-  return `
-    <div class="report-section">Общие данные</div>
-    <div class="report-card">
-      <div class="report-row"><span class="report-key">Поставщик</span><span class="report-val blue">${name}</span></div>
-      <div class="report-row"><span class="report-key">Сделок</span><span class="report-val blue">${d.deals}</span></div>
-      <div class="report-row"><span class="report-key">Тонн закуплено</span><span class="report-val">${d.totalTons.toLocaleString('ru-RU')} тн</span></div>
-      <div class="report-row"><span class="report-key">Сумма закупки</span><span class="report-val">${fmt(d.totalBuy)} сум</span></div>
-      <div class="report-row"><span class="report-key">Уже оплачено</span><span class="report-val green">${fmt(d.totalPaid)} сум</span></div>
-      <div class="report-row"><span class="report-key">Долг поставщику</span><span class="report-val ${debtColor}">${fmt(d.debt)} сум</span></div>
-    </div>
-    ${cementRows}
-    ${dealRows}`;
-}
-
-function fmtRuDate(str) {
-  if (!str) return '';
-  // DD.MM.YYYY → уже правильный формат
-  if (/^\d{2}\.\d{2}\.\d{4}$/.test(str)) return str;
-  // Пробуем распарсить как дату
-  const d = new Date(str);
-  if (isNaN(d)) return str;
-  return d.toLocaleDateString('ru-RU', { day:'2-digit', month:'2-digit', year:'numeric' });
-}
-
-async function openReportPDF(type) {
-  const data = type === 'client' ? lastClientData : lastSupplierData;
-  if (!data) return;
-
-  // Показываем кнопку загрузки
-  const btnId = type === 'client' ? 'btnPdfClient' : 'btnPdfSupplier';
-  const btn = document.getElementById(btnId);
-  if (btn) { btn.disabled = true; btn.textContent = '⏳ Генерируем PDF...'; }
-
-  try {
-    const endpoint = type === 'client' ? 'client_pdf' : 'supplier_pdf';
-    const r = await fetch(API + '?type=' + endpoint + '&name=' + encodeURIComponent(data.name));
-    const d = await r.json();
-    if (d.ok && d.url) {
-      // Открываем ссылку на скачивание
-      window.location.href = d.url;
-    } else {
-      showToast('Ошибка генерации PDF', 'err');
-    }
-  } catch(e) {
-    showToast('Нет соединения', 'err');
-  }
-  if (btn) { btn.disabled = false; btn.textContent = '🖨️ Скачать PDF'; }
-}
-
-function openReportPDF_unused(type) {
-  const data = type === 'client' ? lastClientData : lastSupplierData;
-  if (!data) return;
-  const fmt = v => Math.round(v).toLocaleString('ru-RU');
-  const today = new Date().toLocaleDateString('ru-RU');
-  const isClient = type === 'client';
-  const accentColor = isClient ? '#16a34a' : '#2563eb';
-  const title = isClient ? 'Отчёт по клиенту' : 'Отчёт по поставщику';
-  const debtColor = data.debt > 0 ? '#ef4444' : '#16a34a';
-
-  let summaryRows = '';
-  if (isClient) {
-    summaryRows = `
-      <tr><td>Клиент</td><td><b>${data.name}</b></td></tr>
-      <tr><td>Сделок</td><td>${data.deals}</td></tr>
-      <tr><td>Тонн куплено</td><td>${data.totalTons.toLocaleString('ru-RU')} тн</td></tr>
-      <tr><td>Продано на сумму</td><td>${fmt(data.totalSell)} сум</td></tr>
-      <tr><td>Оплачено</td><td style="color:#16a34a;font-weight:700">${fmt(data.totalPaid)} сум</td></tr>
-      <tr><td>Текущий долг</td><td style="color:${debtColor};font-weight:700;font-size:16px">${fmt(data.debt)} сум</td></tr>`;
-  } else {
-    summaryRows = `
-      <tr><td>Поставщик</td><td><b>${data.name}</b></td></tr>
-      <tr><td>Сделок</td><td>${data.deals}</td></tr>
-      <tr><td>Тонн закуплено</td><td>${data.totalTons.toLocaleString('ru-RU')} тн</td></tr>
-      <tr><td>Сумма закупки</td><td>${fmt(data.totalBuy)} сум</td></tr>
-      <tr><td>Уже оплачено</td><td style="color:#16a34a;font-weight:700">${fmt(data.totalPaid)} сум</td></tr>
-      <tr><td>Долг поставщику</td><td style="color:${debtColor};font-weight:700;font-size:16px">${fmt(data.debt)} сум</td></tr>`;
-  }
-
-  let cementTable = '';
-  if (data.bycement && Object.keys(data.bycement).length) {
-    cementTable = '<h3>По марке цемента</h3><table class="data"><tr><th>Марка</th><th>Тонны</th><th>Сумма</th></tr>';
-    for (const [cement, info] of Object.entries(data.bycement)) {
-      const sum = isClient ? info.sell : info.buy;
-      cementTable += `<tr><td>${cement}</td><td>${info.tons.toLocaleString('ru-RU')} тн</td><td>${fmt(sum)} сум</td></tr>`;
-    }
-    cementTable += '</table>';
-  }
-
-  const histArr = isClient ? data.lastPayments : data.lastDeals;
-  const histTitle = isClient ? 'История оплат' : 'История закупок';
-  let histTable = '';
-  if (histArr && histArr.length) {
-    if (isClient) {
-      histTable = '<h3>' + histTitle + '</h3><table class="data"><tr><th>Дата</th><th>Тип оплаты</th><th>Сумма</th></tr>';
-      histArr.forEach(p => {
-        histTable += `<tr><td>${p.date||''}</td><td>${p.type||''}</td><td style="color:#16a34a;font-weight:600">${fmt(p.amt)} сум</td></tr>`;
-      });
-    } else {
-      histTable = '<h3>' + histTitle + '</h3><table class="data"><tr><th>Дата</th><th>Марка</th><th>Тонны</th><th>Сумма</th></tr>';
-      histArr.forEach(deal => {
-        histTable += `<tr><td>${deal.date||''}</td><td>${deal.cement||''}</td><td>${deal.tons||0} тн</td><td>${fmt(deal.buy)} сум</td></tr>`;
-      });
-    }
-    histTable += '</table>';
-  }
-
-  const html = `<!DOCTYPE html>
-<html><head>
-<meta charset="UTF-8">
-<title>${title} — ${data.name}</title>
-<style>
-  *{margin:0;padding:0;box-sizing:border-box}
-  body{font-family:Arial,sans-serif;color:#1a1a1a;background:#fff}
-  .page{max-width:700px;margin:0 auto;padding:32px}
-  .no-print{display:flex;gap:10px;justify-content:center;margin-bottom:24px}
-  .btn-save{background:${accentColor};color:#fff;border:none;border-radius:8px;padding:13px 32px;font-size:15px;font-weight:700;cursor:pointer;font-family:Arial}
-  .btn-close{background:#f3f4f6;color:#374151;border:none;border-radius:8px;padding:13px 20px;font-size:15px;cursor:pointer;font-family:Arial}
-  .header{border-bottom:3px solid ${accentColor};padding-bottom:14px;margin-bottom:22px}
-  .header h1{font-size:22px;color:${accentColor};margin-bottom:3px}
-  .header p{color:#6b7280;font-size:12px}
-  table.summary{width:100%;border-collapse:collapse;margin-bottom:20px;background:#f9fafb}
-  table.summary td{padding:10px 14px;border-bottom:1px solid #e5e7eb;font-size:14px}
-  table.summary td:first-child{color:#6b7280;width:52%}
-  table.summary td:last-child{text-align:right;font-weight:600}
-  table.summary tr:last-child td{border-bottom:none}
-  h3{font-size:12px;text-transform:uppercase;letter-spacing:.5px;color:#6b7280;margin:20px 0 8px;font-family:Arial}
-  table.data{width:100%;border-collapse:collapse;font-size:13px}
-  table.data th{background:${accentColor};color:#fff;padding:8px 12px;text-align:left;font-weight:600}
-  table.data td{padding:8px 12px;border-bottom:1px solid #f0f0f0}
-  table.data tr:nth-child(even) td{background:#f9fafb}
-  .footer{margin-top:36px;padding-top:14px;border-top:1px solid #e5e7eb;text-align:center;color:#9ca3af;font-size:11px}
-  @media print{
-    .no-print{display:none!important}
-    body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  }
-</style>
-</head><body>
-<div class="page">
-  <div class="no-print">
-    <button class="btn-save" onclick="window.print()">🖨️ Сохранить как PDF</button>
-    <button class="btn-close" onclick="window.close()">✕ Закрыть</button>
-  </div>
-  <div class="header">
-    <h1>${title}</h1>
-    <p>Дата формирования: ${today} &nbsp;·&nbsp; Цемент Учёт</p>
-  </div>
-  <table class="summary">${summaryRows}</table>
-  ${cementTable}
-  ${histTable}
-  <div class="footer">Сформировано автоматически · реализация_2026 · ${today}</div>
-</div>
-</body></html>`;
-
-  const win = window.open('', '_blank');
-  win.document.write(html);
-  win.document.close();
-}
-
-function downloadClientReport() { openReportPDF('client'); }
-function downloadSupplierReport() { openReportPDF('supplier'); }
-
+// ── ПРИБЫЛЬ ───────────────────────────────────────────────────
 function calcProfit() {
   const t=parseFloat(document.getElementById('s_tons').value)||0;
   const b=parseFloat(document.getElementById('s_buy').value)||0;
@@ -794,92 +572,89 @@ function calcProfit() {
   else box.classList.remove('on');
 }
 
-function showToast(msg,type='ok'){
-  const t=document.getElementById('toast');
-  t.textContent=msg; t.className='toast '+type+' on';
-  setTimeout(()=>t.classList.remove('on'),3000);
+// ── ТОСТ ─────────────────────────────────────────────────────
+function showToast(msg, type='ok') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast ' + type + ' on';
+  setTimeout(() => t.classList.remove('on'), 3000);
 }
-function val(id) {
-  // Если есть SearchableSelect — берём из него
-  if (SELECTS[id]) return SELECTS[id].value.trim();
-  const el = document.getElementById(id);
-  return el ? el.value.trim() : '';
-}
+function v(id) { return document.getElementById(id).value.trim(); }
 
-async function submitSavdo(){
-  if(!val('s_client')||!val('s_supplier')||!val('s_cement')||!val('s_auto')||!val('s_tons')||!val('s_buy')||!val('s_sell')){showToast('Заполните все поля','err');return;}
-  const btn=document.getElementById('btnSavdo'); btn.disabled=true; btn.textContent='Сохраняем...';
-  try{
-    const p=new URLSearchParams({type:'savdo',client:val('s_client'),supplier:val('s_supplier'),cement:val('s_cement'),auto:val('s_auto'),tons:val('s_tons'),buy_price:val('s_buy'),sell_price:val('s_sell'),transport:val('s_transport')||0,date:val('s_date')});
-    const r=await fetch(API+'?'+p); const d=await r.json();
-    if(d.ok){
+// ── СОХРАНИТЬ ПРОДАЖУ ─────────────────────────────────────────
+async function submitSavdo() {
+  if (!v('s_client')||!v('s_supplier')||!v('s_cement')||!v('s_auto')||!v('s_tons')||!v('s_buy')||!v('s_sell')) { showToast('Заполните все поля','err'); return; }
+  const btn = document.getElementById('btnSavdo'); btn.disabled=true; btn.textContent='Сохраняем...';
+  try {
+    const p = new URLSearchParams({type:'savdo',client:v('s_client'),supplier:v('s_supplier'),cement:v('s_cement'),auto:v('s_auto'),tons:v('s_tons'),buy_price:v('s_buy'),sell_price:v('s_sell'),transport:v('s_transport')||0,date:v('s_date')});
+    const r = await fetch(API+'?'+p); const d = await r.json();
+    if (d.ok) {
       showToast('✓ Фойда: '+Math.round(d.profit).toLocaleString('ru-RU')+' сум','ok');
-      document.querySelectorAll('#savdoScreen input,#savdoScreen select').forEach(el=>{if(el.tagName==='SELECT')el.selectedIndex=0;else el.value='';});
-      SELECTS.s_client.reset(); SELECTS.s_supplier.reset();
+      ['s_client','s_supplier','s_cement','s_auto','s_tons','s_buy','s_sell','s_transport'].forEach(id => { const el=document.getElementById(id); if(el.tagName==='SELECT')el.selectedIndex=0; else el.value=id==='s_transport'?'0':''; });
       document.getElementById('s_date').value=today();
       document.getElementById('profitBox').classList.remove('on');
       loadBalance();
       setTimeout(()=>{goHome();btn.disabled=false;btn.textContent='✓ Сохранить продажу';},1500);
     } else { showToast('Ошибка: '+(d.error||''),'err'); btn.disabled=false; btn.textContent='✓ Сохранить продажу'; }
-  }catch(e){showToast('Нет соединения','err'); btn.disabled=false; btn.textContent='✓ Сохранить продажу';}
+  } catch(e) { showToast('Нет соединения','err'); btn.disabled=false; btn.textContent='✓ Сохранить продажу'; }
 }
 
-async function submitKirim(){
-  if(!val('k_client')||!val('k_payment')||!val('k_amount')){showToast('Заполните все поля','err');return;}
-  const btn=document.getElementById('btnKirim'); btn.disabled=true; btn.textContent='Сохраняем...';
-  try{
-    const p=new URLSearchParams({type:'kirim',client:val('k_client'),payment_type:val('k_payment'),amount:val('k_amount'),date:val('k_date')});
-    const r=await fetch(API+'?'+p); const d=await r.json();
-    if(d.ok){
+// ── СОХРАНИТЬ ПРИХОД ──────────────────────────────────────────
+async function submitKirim() {
+  if (!v('k_client')||!v('k_payment')||!v('k_amount')) { showToast('Заполните все поля','err'); return; }
+  const btn = document.getElementById('btnKirim'); btn.disabled=true; btn.textContent='Сохраняем...';
+  try {
+    const p = new URLSearchParams({type:'kirim',client:v('k_client'),payment_type:v('k_payment'),amount:v('k_amount'),date:v('k_date')});
+    const r = await fetch(API+'?'+p); const d = await r.json();
+    if (d.ok) {
       showToast('✓ Приход сохранён!','ok');
-      document.querySelectorAll('#kirimScreen input,#kirimScreen select').forEach(el=>{if(el.tagName==='SELECT')el.selectedIndex=0;else el.value='';});
-      SELECTS.k_client.reset();
+      ['k_client','k_payment','k_amount'].forEach(id=>{const el=document.getElementById(id);if(el.tagName==='SELECT')el.selectedIndex=0;else el.value='';});
       document.getElementById('k_date').value=today();
       loadBalance();
       setTimeout(()=>{goHome();btn.disabled=false;btn.textContent='✓ Сохранить приход';},1500);
     } else { showToast('Ошибка','err'); btn.disabled=false; btn.textContent='✓ Сохранить приход'; }
-  }catch(e){showToast('Нет соединения','err'); btn.disabled=false; btn.textContent='✓ Сохранить приход';}
+  } catch(e) { showToast('Нет соединения','err'); btn.disabled=false; btn.textContent='✓ Сохранить приход'; }
 }
 
-async function submitChiqim(){
-  if(!val('ch_payee')||!val('ch_type')||!val('ch_payment')||!val('ch_amount')){showToast('Заполните все поля','err');return;}
-  const btn=document.getElementById('btnChiqim'); btn.disabled=true; btn.textContent='Сохраняем...';
-  try{
-    const p=new URLSearchParams({type:'chiqim',payee:val('ch_payee'),expense_type:val('ch_type'),payment_type:val('ch_payment'),amount:val('ch_amount'),date:val('ch_date')});
-    const r=await fetch(API+'?'+p); const d=await r.json();
-    if(d.ok){
+// ── СОХРАНИТЬ РАСХОД ──────────────────────────────────────────
+async function submitChiqim() {
+  if (!v('ch_payee')||!v('ch_type')||!v('ch_payment')||!v('ch_amount')) { showToast('Заполните все поля','err'); return; }
+  const btn = document.getElementById('btnChiqim'); btn.disabled=true; btn.textContent='Сохраняем...';
+  try {
+    const p = new URLSearchParams({type:'chiqim',payee:v('ch_payee'),expense_type:v('ch_type'),payment_type:v('ch_payment'),amount:v('ch_amount'),date:v('ch_date')});
+    const r = await fetch(API+'?'+p); const d = await r.json();
+    if (d.ok) {
       showToast('✓ Расход сохранён!','ok');
-      document.querySelectorAll('#chiqimScreen input,#chiqimScreen select').forEach(el=>{if(el.tagName==='SELECT')el.selectedIndex=0;else el.value='';});
+      ['ch_payee','ch_type','ch_payment','ch_amount'].forEach(id=>{const el=document.getElementById(id);if(el.tagName==='SELECT')el.selectedIndex=0;else el.value='';});
       document.getElementById('ch_date').value=today();
-      onChiqimTypeChange(); SELECTS.ch_payee.reset();
+      onChiqimTypeChange();
       loadBalance();
       setTimeout(()=>{goHome();btn.disabled=false;btn.textContent='✓ Сохранить расход';},1500);
     } else { showToast('Ошибка','err'); btn.disabled=false; btn.textContent='✓ Сохранить расход'; }
-  }catch(e){showToast('Нет соединения','err'); btn.disabled=false; btn.textContent='✓ Сохранить расход';}
+  } catch(e) { showToast('Нет соединения','err'); btn.disabled=false; btn.textContent='✓ Сохранить расход'; }
 }
 
-// === ANALYTICS ===
+// ── АНАЛИТИКА ─────────────────────────────────────────────────
 async function openDashboard() {
-  showScreen('analyticsScreen','📈 Аналитика','Графики и тренды');
-  if(analyticsLoaded) return;
+  go('analyticsScreen','📈 Аналитика','Графики и тренды');
+  if (analyticsLoaded) return;
   document.getElementById('dashContent').innerHTML='<div class="dash-loading"><div class="dash-spinner"></div>Загружаем данные...</div>';
-  try{
-    const r=await fetch(API+'?type=analytics'); const d=await r.json();
-    if(d.ok) renderDashboard(d);
-    else document.getElementById('dashContent').innerHTML='<div class="dash-loading" style="color:var(--red)">Ошибка</div>';
-  }catch(e){document.getElementById('dashContent').innerHTML='<div class="dash-loading" style="color:var(--red)">Нет соединения</div>';}
+  try {
+    const r = await fetch(API+'?type=analytics'); const d = await r.json();
+    if (d.ok) renderDashboard(d);
+    else document.getElementById('dashContent').innerHTML='<div class="dash-loading" style="color:var(--red)">Ошибка загрузки</div>';
+  } catch(e) { document.getElementById('dashContent').innerHTML='<div class="dash-loading" style="color:var(--red)">Нет соединения</div>'; }
 }
 
 function renderDashboard(d) {
-  analyticsLoaded=true;
-  const fmt=v=>Math.round(v).toLocaleString('ru-RU');
-  const mln=v=>{const m=v/1000000;return m>=1?m.toFixed(1)+'M':Math.round(v/1000)+'K';};
-  const topDebtHTML=d.topClients.length?d.topClients.map(c=>{
-    const pct=d.topClients[0].debt>0?(c.debt/d.topClients[0].debt*100):0;
+  analyticsLoaded = true;
+  const fmt = v => Math.round(v).toLocaleString('ru-RU');
+  const mln = v => { const m=v/1000000; return m>=1?m.toFixed(1)+'M':Math.round(v/1000)+'K'; };
+  const topDebtHTML = d.topClients.length ? d.topClients.map(c => {
+    const pct = d.topClients[0].debt > 0 ? (c.debt/d.topClients[0].debt*100) : 0;
     return `<div class="debt-item"><div class="debt-name">${c.name}</div><div class="debt-bar-wrap"><div class="debt-bar" style="width:${pct}%"></div></div><div class="debt-amt">${mln(c.debt)}</div></div>`;
-  }).join(''):'<div style="color:var(--muted);font-size:13px;text-align:center;padding:12px">Долгов нет 🎉</div>';
+  }).join('') : '<div style="color:var(--muted);font-size:13px;text-align:center;padding:12px">Долгов нет 🎉</div>';
 
-  document.getElementById('dashContent').innerHTML=`
+  document.getElementById('dashContent').innerHTML = `
     <div class="kpi-grid">
       <div class="kpi-card"><div class="kpi-icon">💰</div><div class="kpi-label">Касса</div><div class="kpi-val green">${mln(d.balance)} сум</div></div>
       <div class="kpi-card"><div class="kpi-icon">📦</div><div class="kpi-label">Тоннаж</div><div class="kpi-val blue">${fmt(d.totalTons)} тн</div></div>
@@ -890,8 +665,8 @@ function renderDashboard(d) {
       <div class="chart-title">Фойда за 14 дней</div>
       <div class="chart-sub">Прибыль по дням</div>
       <div class="chart-tabs">
-        <button class="chart-tab on" onclick="switchProfitTab('bar',this)">Бар</button>
-        <button class="chart-tab" onclick="switchProfitTab('line',this)">Линия</button>
+        <button class="chart-tab on" onclick="switchTab('bar',this)">Бар</button>
+        <button class="chart-tab" onclick="switchTab('line',this)">Линия</button>
       </div>
       <div class="chart-wrap"><canvas id="chartProfit"></canvas></div>
     </div>
@@ -906,25 +681,25 @@ function renderDashboard(d) {
       <div class="debt-list">${topDebtHTML}</div>
     </div>`;
 
-  const profits=d.days.map(x=>x.profit);
-  chartProfit=new Chart(document.getElementById('chartProfit').getContext('2d'),{
+  const profits = d.days.map(x => x.profit);
+  chartProfit = new Chart(document.getElementById('chartProfit').getContext('2d'),{
     type:'bar',
     data:{labels:d.days.map(x=>x.date),datasets:[{label:'Фойда',data:profits,backgroundColor:profits.map(v=>v>=0?'#22c55e44':'#ef444444'),borderColor:profits.map(v=>v>=0?'#22c55e':'#ef4444'),borderWidth:1.5,borderRadius:4}]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#7070a0',font:{size:10}},grid:{color:'#2e2e3e'}},y:{ticks:{color:'#7070a0',font:{size:10},callback:v=>v>=1e6?(v/1e6).toFixed(1)+'M':(v/1000).toFixed(0)+'K'},grid:{color:'#2e2e3e'}}}}
   });
-  chartPayment=new Chart(document.getElementById('chartPayment').getContext('2d'),{
+  chartPayment = new Chart(document.getElementById('chartPayment').getContext('2d'),{
     type:'doughnut',
     data:{labels:['Наличные','Банк'],datasets:[{data:[d.cashAmount||0,d.bankAmount||0],backgroundColor:['#22c55e55','#60a5fa55'],borderColor:['#22c55e','#60a5fa'],borderWidth:2}]},
     options:{responsive:true,maintainAspectRatio:false,cutout:'68%',plugins:{legend:{position:'bottom',labels:{color:'#7070a0',font:{size:12},padding:16,boxWidth:12}}}}
   });
 }
 
-function switchProfitTab(type,el){
+function switchTab(type, el) {
   document.querySelectorAll('.chart-tab').forEach(t=>t.classList.remove('on')); el.classList.add('on');
-  if(chartProfit){
-    chartProfit.config.type=type;
-    if(type==='line'){chartProfit.data.datasets[0].fill=true;chartProfit.data.datasets[0].backgroundColor='#22c55e22';chartProfit.data.datasets[0].borderColor='#22c55e';chartProfit.data.datasets[0].tension=0.4;}
-    else{const p=chartProfit.data.datasets[0].data;chartProfit.data.datasets[0].backgroundColor=p.map(v=>v>=0?'#22c55e44':'#ef444444');chartProfit.data.datasets[0].borderColor=p.map(v=>v>=0?'#22c55e':'#ef4444');}
+  if (chartProfit) {
+    chartProfit.config.type = type;
+    if (type==='line') { chartProfit.data.datasets[0].fill=true; chartProfit.data.datasets[0].backgroundColor='#22c55e22'; chartProfit.data.datasets[0].borderColor='#22c55e'; chartProfit.data.datasets[0].tension=0.4; }
+    else { const p=chartProfit.data.datasets[0].data; chartProfit.data.datasets[0].backgroundColor=p.map(v=>v>=0?'#22c55e44':'#ef444444'); chartProfit.data.datasets[0].borderColor=p.map(v=>v>=0?'#22c55e':'#ef4444'); }
     chartProfit.update();
   }
 }
