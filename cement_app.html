@@ -8,6 +8,7 @@
 <meta name="apple-mobile-web-app-title" content="Цемент">
 <title>Учёт цемента</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -455,77 +456,161 @@ function renderClientReport(name, d) {
     ${payRows}`;
 }
 
-function downloadClientReport() {
-  if (!lastClientData) return;
-  const d = lastClientData;
+function fmtRuDate(str) {
+  if (!str) return '';
+  // DD.MM.YYYY → уже правильный формат
+  if (/^\d{2}\.\d{2}\.\d{4}$/.test(str)) return str;
+  // Пробуем распарсить как дату
+  const d = new Date(str);
+  if (isNaN(d)) return str;
+  return d.toLocaleDateString('ru-RU', { day:'2-digit', month:'2-digit', year:'numeric' });
+}
+
+function generatePDF(type) {
+  const data = type === 'client' ? lastClientData : lastSupplierData;
+  if (!data) return;
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
   const fmt = v => Math.round(v).toLocaleString('ru-RU');
   const today = new Date().toLocaleDateString('ru-RU');
-  const debtColor = d.debt > 0 ? '#ef4444' : d.debt < 0 ? '#22c55e' : '#333';
+  const pageW = doc.internal.pageSize.getWidth();
+  const margin = 15;
+  const colW = pageW - margin*2;
+  let y = 20;
 
-  let cementTable = '';
-  if (d.bycement && Object.keys(d.bycement).length) {
-    cementTable = `<h3 style="margin:20px 0 8px;color:#333;font-size:14px">По марке цемента</h3>
-    <table><tr><th>Марка</th><th>Тонны</th><th>Сумма</th></tr>`;
-    for (const [cement, info] of Object.entries(d.bycement)) {
-      cementTable += `<tr><td>${cement}</td><td>${info.tons.toLocaleString('ru-RU')} тн</td><td>${fmt(info.sell)} сум</td></tr>`;
+  // Шрифт (jsPDF поддерживает только Latin по умолчанию — используем встроенный)
+  doc.setFont('helvetica');
+
+  // Заголовок
+  const title = type === 'client' ? 'Otchet po klientu' : 'Otchet po postavshiku';
+  const name = data.name;
+  doc.setFillColor(22, 163, 74);
+  doc.rect(margin, y-6, colW, 14, 'F');
+  doc.setTextColor(255,255,255);
+  doc.setFontSize(16); doc.setFont('helvetica','bold');
+  doc.text(title, margin+4, y+3);
+  y += 14;
+
+  doc.setTextColor(100,100,100);
+  doc.setFontSize(9); doc.setFont('helvetica','normal');
+  doc.text('Data: ' + today + '   Tsement Uchet', margin, y+4);
+  y += 12;
+
+  // Функция строки
+  function row(label, value, valueColor) {
+    doc.setFillColor(248,249,250);
+    doc.rect(margin, y, colW, 8, 'F');
+    doc.setDrawColor(229,231,235);
+    doc.rect(margin, y, colW, 8, 'S');
+    doc.setTextColor(100,100,100); doc.setFontSize(10); doc.setFont('helvetica','normal');
+    doc.text(label, margin+3, y+5.5);
+    if (valueColor) doc.setTextColor(...valueColor);
+    else doc.setTextColor(30,30,30);
+    doc.setFont('helvetica','bold');
+    doc.text(value, pageW-margin-3, y+5.5, {align:'right'});
+    doc.setFont('helvetica','normal');
+    y += 8;
+  }
+
+  // Основные данные
+  doc.setTextColor(30,30,30); doc.setFontSize(11); doc.setFont('helvetica','bold');
+  doc.text('Imya: ' + name, margin, y+5);
+  y += 10;
+
+  if (type === 'client') {
+    row('Sdelok:', data.deals.toString());
+    row('Tonn kupleno:', data.totalTons.toLocaleString('ru-RU') + ' tn');
+    row('Prodano na summu:', fmt(data.totalSell) + ' sum');
+    row('Oplacheno:', fmt(data.totalPaid) + ' sum', [22,163,74]);
+    const dc = data.debt > 0 ? [239,68,68] : [22,163,74];
+    row('Tekuschiy dolg:', fmt(data.debt) + ' sum', dc);
+  } else {
+    row('Sdelok:', data.deals.toString());
+    row('Tonn zakupleno:', data.totalTons.toLocaleString('ru-RU') + ' tn');
+    row('Summa zakupki:', fmt(data.totalBuy) + ' sum');
+    row('Oplacheno:', fmt(data.totalPaid) + ' sum', [22,163,74]);
+    const dc = data.debt > 0 ? [239,68,68] : [22,163,74];
+    row('Dolg postavshiku:', fmt(data.debt) + ' sum', dc);
+  }
+  y += 6;
+
+  // Таблица по марке цемента
+  if (data.bycement && Object.keys(data.bycement).length) {
+    doc.setFontSize(11); doc.setFont('helvetica','bold'); doc.setTextColor(30,30,30);
+    doc.text('Po marke tsementa:', margin, y); y += 5;
+    // Заголовок таблицы
+    doc.setFillColor(22,163,74); doc.rect(margin, y, colW, 7, 'F');
+    doc.setTextColor(255,255,255); doc.setFontSize(9); doc.setFont('helvetica','bold');
+    doc.text('Marka', margin+3, y+5);
+    doc.text('Tonny', margin+colW*0.45, y+5);
+    doc.text('Summa', margin+colW*0.72, y+5);
+    y += 7;
+    let even = false;
+    for (const [cement, info] of Object.entries(data.bycement)) {
+      if (even) { doc.setFillColor(249,250,251); doc.rect(margin, y, colW, 7, 'F'); }
+      doc.setTextColor(50,50,50); doc.setFontSize(9); doc.setFont('helvetica','normal');
+      doc.text(cement, margin+3, y+5);
+      doc.text(info.tons.toLocaleString('ru-RU') + ' tn', margin+colW*0.45, y+5);
+      doc.text(fmt(type==='client'?info.sell:info.buy) + ' sum', margin+colW*0.72, y+5);
+      doc.setDrawColor(229,231,235); doc.rect(margin, y, colW, 7, 'S');
+      y += 7; even = !even;
     }
-    cementTable += '</table>';
+    y += 5;
   }
 
-  let payTable = '';
-  if (d.lastPayments && d.lastPayments.length) {
-    payTable = `<h3 style="margin:20px 0 8px;color:#333;font-size:14px">История оплат</h3>
-    <table><tr><th>Дата</th><th>Тип</th><th>Сумма</th></tr>`;
-    d.lastPayments.forEach(p => {
-      payTable += `<tr><td>${p.date}</td><td>${p.type}</td><td style="color:#16a34a;font-weight:600">${fmt(p.amt)} сум</td></tr>`;
+  // История оплат / сделок
+  const histArr = type === 'client' ? data.lastPayments : data.lastDeals;
+  const histLabel = type === 'client' ? 'Istoriya oplat:' : 'Istoriya zakupok:';
+  if (histArr && histArr.length) {
+    // Новая страница если мало места
+    if (y > 220) { doc.addPage(); y = 20; }
+    doc.setFontSize(11); doc.setFont('helvetica','bold'); doc.setTextColor(30,30,30);
+    doc.text(histLabel, margin, y); y += 5;
+    doc.setFillColor(22,163,74); doc.rect(margin, y, colW, 7, 'F');
+    doc.setTextColor(255,255,255); doc.setFontSize(9); doc.setFont('helvetica','bold');
+    if (type === 'client') {
+      doc.text('Data', margin+3, y+5);
+      doc.text('Tip', margin+colW*0.35, y+5);
+      doc.text('Summa', margin+colW*0.72, y+5);
+    } else {
+      doc.text('Data', margin+3, y+5);
+      doc.text('Marka', margin+colW*0.3, y+5);
+      doc.text('Tonny', margin+colW*0.58, y+5);
+      doc.text('Summa', margin+colW*0.75, y+5);
+    }
+    y += 7;
+    let even = false;
+    histArr.forEach(item => {
+      if (y > 270) { doc.addPage(); y = 20; }
+      if (even) { doc.setFillColor(249,250,251); doc.rect(margin, y, colW, 7, 'F'); }
+      doc.setTextColor(50,50,50); doc.setFontSize(9); doc.setFont('helvetica','normal');
+      if (type === 'client') {
+        doc.text(item.date||'', margin+3, y+5);
+        doc.text(item.type||'', margin+colW*0.35, y+5);
+        doc.setTextColor(22,163,74); doc.setFont('helvetica','bold');
+        doc.text(fmt(item.amt)+' sum', margin+colW*0.72, y+5);
+        doc.setTextColor(50,50,50); doc.setFont('helvetica','normal');
+      } else {
+        doc.text(item.date||'', margin+3, y+5);
+        doc.text(item.cement||'', margin+colW*0.3, y+5);
+        doc.text((item.tons||0)+' tn', margin+colW*0.58, y+5);
+        doc.text(fmt(item.buy)+' sum', margin+colW*0.75, y+5);
+      }
+      doc.setDrawColor(229,231,235); doc.rect(margin, y, colW, 7, 'S');
+      y += 7; even = !even;
     });
-    payTable += '</table>';
   }
 
-  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
-  <title>Отчёт — ${d.name}</title>
-  <style>
-    body{font-family:Arial,sans-serif;padding:32px;color:#333;max-width:700px;margin:0 auto}
-    .header{border-bottom:3px solid #16a34a;padding-bottom:16px;margin-bottom:24px}
-    .header h1{font-size:22px;color:#16a34a;margin:0 0 4px}
-    .header p{color:#666;font-size:13px;margin:0}
-    .summary{background:#f8f9fa;border-radius:8px;padding:16px;margin-bottom:20px}
-    .row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #e5e7eb}
-    .row:last-child{border-bottom:none}
-    .key{color:#666;font-size:14px}.val{font-weight:700;font-size:14px}
-    table{width:100%;border-collapse:collapse;font-size:13px}
-    th{background:#16a34a;color:#fff;padding:8px 12px;text-align:left}
-    td{padding:8px 12px;border-bottom:1px solid #e5e7eb}
-    tr:nth-child(even) td{background:#f9fafb}
-    .debt{color:${debtColor};font-size:20px;font-weight:800}
-    .footer{margin-top:32px;text-align:center;color:#999;font-size:12px;border-top:1px solid #e5e7eb;padding-top:16px}
-    @media print{body{padding:16px}.no-print{display:none}}
-  </style></head><body>
-  <div class="header">
-    <h1>📊 Отчёт по клиенту</h1>
-    <p>Дата формирования: ${today} · Цемент Учёт</p>
-  </div>
-  <div class="summary">
-    <div class="row"><span class="key">Клиент</span><span class="val">${d.name}</span></div>
-    <div class="row"><span class="key">Сделок</span><span class="val">${d.deals}</span></div>
-    <div class="row"><span class="key">Тонн куплено</span><span class="val">${d.totalTons.toLocaleString('ru-RU')} тн</span></div>
-    <div class="row"><span class="key">Продано на сумму</span><span class="val">${fmt(d.totalSell)} сум</span></div>
-    <div class="row"><span class="key">Оплачено</span><span class="val" style="color:#16a34a">${fmt(d.totalPaid)} сум</span></div>
-    <div class="row"><span class="key">Текущий долг</span><span class="val debt">${fmt(d.debt)} сум</span></div>
-  </div>
-  ${cementTable}
-  ${payTable}
-  <div class="footer">Сформировано автоматически · реализация_2026</div>
-  <script>window.onload=()=>window.print()<\/script>
-  </body></html>`;
+  // Подвал
+  doc.setTextColor(150,150,150); doc.setFontSize(8); doc.setFont('helvetica','normal');
+  doc.text('Sformirovano avtomaticheski · realizatsiya_2026 · ' + today,
+    pageW/2, doc.internal.pageSize.getHeight()-10, {align:'center'});
 
-  const blob = new Blob([html], {type:'text/html'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `Отчёт_${d.name}_${today.replace(/\./g,'-')}.html`;
-  a.click();
-  URL.revokeObjectURL(url);
+  doc.save('Otchet_' + name.replace(/\s/g,'_') + '_' + today.replace(/\./g,'-') + '.pdf');
+}
+
+function downloadClientReport() {
+  generatePDF('client');
 }
 
 async function loadSupplierReport() {
@@ -579,76 +664,7 @@ function renderSupplierReport(name, d) {
 }
 
 function downloadSupplierReport() {
-  if (!lastSupplierData) return;
-  const d = lastSupplierData;
-  const fmt = v => Math.round(v).toLocaleString('ru-RU');
-  const today = new Date().toLocaleDateString('ru-RU');
-  const debtColor = d.debt > 0 ? '#ef4444' : '#16a34a';
-
-  let cementTable = '';
-  if (d.bycement && Object.keys(d.bycement).length) {
-    cementTable = `<h3 style="margin:20px 0 8px;color:#333;font-size:14px">По марке цемента</h3>
-    <table><tr><th>Марка</th><th>Тонны</th><th>Сумма закупки</th></tr>`;
-    for (const [cement, info] of Object.entries(d.bycement)) {
-      cementTable += `<tr><td>${cement}</td><td>${info.tons.toLocaleString('ru-RU')} тн</td><td>${fmt(info.buy)} сум</td></tr>`;
-    }
-    cementTable += '</table>';
-  }
-
-  let dealTable = '';
-  if (d.lastDeals && d.lastDeals.length) {
-    dealTable = `<h3 style="margin:20px 0 8px;color:#333;font-size:14px">История закупок</h3>
-    <table><tr><th>Дата</th><th>Марка</th><th>Тонны</th><th>Сумма</th></tr>`;
-    d.lastDeals.forEach(deal => {
-      dealTable += `<tr><td>${deal.date}</td><td>${deal.cement}</td><td>${deal.tons} тн</td><td>${fmt(deal.buy)} сум</td></tr>`;
-    });
-    dealTable += '</table>';
-  }
-
-  const html = `<!DOCTYPE html><html><head><meta charset="UTF-8">
-  <title>Отчёт — ${d.name}</title>
-  <style>
-    body{font-family:Arial,sans-serif;padding:32px;color:#333;max-width:700px;margin:0 auto}
-    .header{border-bottom:3px solid #2563eb;padding-bottom:16px;margin-bottom:24px}
-    .header h1{font-size:22px;color:#2563eb;margin:0 0 4px}
-    .header p{color:#666;font-size:13px;margin:0}
-    .summary{background:#f8f9fa;border-radius:8px;padding:16px;margin-bottom:20px}
-    .row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #e5e7eb}
-    .row:last-child{border-bottom:none}
-    .key{color:#666;font-size:14px}.val{font-weight:700;font-size:14px}
-    table{width:100%;border-collapse:collapse;font-size:13px}
-    th{background:#2563eb;color:#fff;padding:8px 12px;text-align:left}
-    td{padding:8px 12px;border-bottom:1px solid #e5e7eb}
-    tr:nth-child(even) td{background:#f9fafb}
-    .debt{color:${debtColor};font-size:20px;font-weight:800}
-    .footer{margin-top:32px;text-align:center;color:#999;font-size:12px;border-top:1px solid #e5e7eb;padding-top:16px}
-    @media print{body{padding:16px}}
-  </style></head><body>
-  <div class="header">
-    <h1>🏭 Отчёт по поставщику</h1>
-    <p>Дата формирования: ${today} · Цемент Учёт</p>
-  </div>
-  <div class="summary">
-    <div class="row"><span class="key">Поставщик</span><span class="val">${d.name}</span></div>
-    <div class="row"><span class="key">Сделок</span><span class="val">${d.deals}</span></div>
-    <div class="row"><span class="key">Тонн закуплено</span><span class="val">${d.totalTons.toLocaleString('ru-RU')} тн</span></div>
-    <div class="row"><span class="key">Сумма закупки</span><span class="val">${fmt(d.totalBuy)} сум</span></div>
-    <div class="row"><span class="key">Уже оплачено</span><span class="val" style="color:#16a34a">${fmt(d.totalPaid)} сум</span></div>
-    <div class="row"><span class="key">Долг поставщику</span><span class="val debt">${fmt(d.debt)} сум</span></div>
-  </div>
-  ${cementTable}
-  ${dealTable}
-  <div class="footer">Сформировано автоматически · реализация_2026</div>
-  <script>window.onload=()=>window.print()<\/script>
-  </body></html>`;
-
-  const blob = new Blob([html], {type:'text/html'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `Отчёт_${d.name}_${today.replace(/\./g,'-')}.html`;
-  a.click();
-  URL.revokeObjectURL(url);
+  generatePDF('supplier');
 }
 
 function calcProfit() {
