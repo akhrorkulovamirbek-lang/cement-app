@@ -480,7 +480,12 @@ async function loadClientReport() {
     if (!d.ok) { el.innerHTML = `<div style="color:var(--red);text-align:center;padding:12px">Ошибка: ${d.error||''}</div>`; return; }
     lastClientData = { name, ...d };
     const fmt = v => Math.round(v).toLocaleString('ru-RU');
+    // debt > 0 = клиент должен нам (красный)
+    // debt < 0 = мы должны клиенту (зелёный)
+    // debt = 0 = закрыт
     const debtColor = d.debt > 0 ? 'red' : d.debt < 0 ? 'green' : '';
+    const debtLabel = d.debt < 0 ? 'Переплата (мы должны)' : 'Текущий долг';
+    const debtVal = Math.abs(d.debt);
 
     let cementHTML = '';
     if (d.bycement && Object.keys(d.bycement).length) {
@@ -508,7 +513,7 @@ async function loadClientReport() {
         <div class="report-row"><span class="report-key">Тонн куплено</span><span class="report-val">${d.totalTons.toLocaleString('ru-RU')} тн</span></div>
         <div class="report-row"><span class="report-key">Продано на сумму</span><span class="report-val">${fmt(d.totalSell)} сум</span></div>
         <div class="report-row"><span class="report-key">Оплачено</span><span class="report-val green">${fmt(d.totalPaid)} сум</span></div>
-        <div class="report-row"><span class="report-key">Текущий долг</span><span class="report-val ${debtColor}">${fmt(d.debt)} сум</span></div>
+        <div class="report-row"><span class="report-key">${debtLabel}</span><span class="report-val ${debtColor}">${fmt(debtVal)} сум</span></div>
       </div>
       ${cementHTML}${payHTML}
       <button onclick="downloadReport('client')" style="margin-top:12px;width:100%;padding:14px;background:var(--blue);color:#000;font-family:var(--font);font-size:15px;font-weight:600;border:none;border-radius:10px;cursor:pointer">🖨️ Скачать отчёт</button>`;
