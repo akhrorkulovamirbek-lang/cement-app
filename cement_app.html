@@ -643,7 +643,9 @@ async function submitChiqim() {
 // ── АНАЛИТИКА ─────────────────────────────────────────────────
 async function openDashboard() {
   go('analyticsScreen','📈 Аналитика','Графики и тренды');
-  if (analyticsLoaded) return;
+  analyticsLoaded = false; // всегда перезагружаем свежие данные
+  if (chartProfit)  { chartProfit.destroy();  chartProfit  = null; }
+  if (chartPayment) { chartPayment.destroy(); chartPayment = null; }
   document.getElementById('dashContent').innerHTML='<div class="dash-loading"><div class="dash-spinner"></div>Загружаем данные...</div>';
   try {
     const r = await fetch(API+'?type=analytics'); const d = await r.json();
@@ -654,6 +656,9 @@ async function openDashboard() {
 
 function renderDashboard(d) {
   analyticsLoaded = true;
+  // Уничтожаем старые графики чтобы не было конфликта
+  if (chartProfit)  { chartProfit.destroy();  chartProfit  = null; }
+  if (chartPayment) { chartPayment.destroy(); chartPayment = null; }
   const fmt = v => Math.round(v).toLocaleString('ru-RU');
   const mln = v => { const m=v/1000000; return m>=1?m.toFixed(1)+'M':Math.round(v/1000)+'K'; };
   const topDebtHTML = d.topClients.length ? d.topClients.map(c => {
