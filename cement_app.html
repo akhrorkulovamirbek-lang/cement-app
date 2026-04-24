@@ -509,6 +509,7 @@ async function loadClientReport() {
       <div class="report-section">Общие данные</div>
       <div class="report-card">
         <div class="report-row"><span class="report-key">Клиент</span><span class="report-val blue">${name}</span></div>
+        ${d.startBalance ? `<div class="report-row"><span class="report-key">Нач. сальдо</span><span class="report-val amber">${fmt(d.startBalance)} сум</span></div>` : ''}
         <div class="report-row"><span class="report-key">Сделок</span><span class="report-val">${d.deals}</span></div>
         <div class="report-row"><span class="report-key">Тонн куплено</span><span class="report-val">${d.totalTons.toLocaleString('ru-RU')} тн</span></div>
         <div class="report-row"><span class="report-key">Продано на сумму</span><span class="report-val">${fmt(d.totalSell)} сум</span></div>
