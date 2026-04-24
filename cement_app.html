@@ -513,6 +513,7 @@ async function loadClientReport() {
         <div class="report-row"><span class="report-key">Тонн куплено</span><span class="report-val">${d.totalTons.toLocaleString('ru-RU')} тн</span></div>
         <div class="report-row"><span class="report-key">Продано на сумму</span><span class="report-val">${fmt(d.totalSell)} сум</span></div>
         <div class="report-row"><span class="report-key">Оплачено</span><span class="report-val green">${fmt(d.totalPaid)} сум</span></div>
+        ${d.totalReturned > 0 ? `<div class="report-row"><span class="report-key">Возвращено клиенту</span><span class="report-val red">-${fmt(d.totalReturned)} сум</span></div>` : ''}
         <div class="report-row"><span class="report-key">${debtLabel}</span><span class="report-val ${debtColor}">${fmt(debtVal)} сум</span></div>
       </div>
       ${cementHTML}${payHTML}
